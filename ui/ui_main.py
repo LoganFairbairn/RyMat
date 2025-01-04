@@ -21,21 +21,6 @@ def update_main_ui_sections(self, context):
     if context.scene.rymat_panel_properties.sections == 'SECTION_EXPORT_TEXTURES':
         export_textures.read_export_template_names()
 
-class MiscSubMenu(Menu):
-    bl_idname = "RYMAT_MT_misc_sub_menu"
-    bl_label = "Main Sub Menu"
-
-    def draw(self, context):
-        layout = self.layout
-        # May not need this, users could use externally edit UVs instead.
-        #layout.operator("rymat.export_uvs", text="Export UV Map", icon='NONE')
-        layout.operator("rymat.append_default_workspace", text="Append Default Workspace", icon='NONE')
-        layout.operator("rymat.append_material_ball", text="Append Material Ball", icon='NONE')
-        layout.operator("rymat.apply_default_shader", text="Apply Default Shader", icon='NONE')
-        layout.operator("rymat.add_black_outlines", text="Add Black Outlines", icon='NONE')
-        layout.operator("rymat.remove_outlines", text="Remove Black Outlines", icon='NONE')
-        layout.operator("wm.url_open", text="Documentation", icon='NONE').url = "https://loganfairbairn.github.io/rymat_documentation.html"
-
 class RYMAT_panel_properties(bpy.types.PropertyGroup):
     sections: bpy.props.EnumProperty(
         items=[('SECTION_EDIT_MATERIALS', "Edit Layers", "This section contains operators to edit material layers."),
@@ -43,7 +28,10 @@ class RYMAT_panel_properties(bpy.types.PropertyGroup):
                ('SECTION_EXPORT_TEXTURES', "Export Textures", "This section contains operations to quickly export textures made with RyMat."),
                ('SECTION_TEXTURE_SETTINGS', "TEXTURE SETTINGS", "Settings that defined how materials and textures are created by this add-on."),
                ('SECTION_SHADER_SETTINGS', "Shader Settings", "Settings for shader node setups."),
-               ('SECTION_VIEWPORT_SETTINGS', "VIEWPORT", "This section contains select viewport render settings to help preview materials")],
+               ('SECTION_VIEWPORT_SETTINGS', "VIEWPORT", "This section contains select viewport render settings to help preview materials"),
+               ('SECTION_APPEND', "VIEWPORT", "This section operators to append useful assets to your blend file"),
+               ('SECTION_OUTLINES', "VIEWPORT", "This section operators to apply and edit outline effects for toon shaders")
+        ],
         name="RyMat Sections",
         description="Current rymat category",
         default='SECTION_EDIT_MATERIALS',
@@ -84,17 +72,18 @@ class RYMAT_PT_Panel(bpy.types.Panel):
         row.scale_y = 1.5
         row.prop_enum(panel_properties, "sections", 'SECTION_EDIT_MATERIALS', text="", icon='MATERIAL')
         row.prop_enum(panel_properties, "sections", "SECTION_MESH_MAPS", text="", icon='FACE_MAPS')
-        row.prop_enum(panel_properties, "sections", 'SECTION_TEXTURE_SETTINGS', text="", icon='TEXTURE')
-        row.prop_enum(panel_properties, "sections", 'SECTION_EXPORT_TEXTURES', text="", icon='EXPORT')
+        row.prop_enum(panel_properties, "sections", 'SECTION_OUTLINES', text="", icon='LINE_DATA')
+        row.prop_enum(panel_properties, "sections", 'SECTION_APPEND', text="", icon='APPEND_BLEND')
         row.prop_enum(panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="", icon='MATSHADERBALL')
         row.prop_enum(panel_properties, "sections", 'SECTION_VIEWPORT_SETTINGS', text="", icon='VIEW3D')
+        row.prop_enum(panel_properties, "sections", 'SECTION_TEXTURE_SETTINGS', text="", icon='TEXTURE')
+        row.prop_enum(panel_properties, "sections", 'SECTION_EXPORT_TEXTURES', text="", icon='EXPORT')
 
-        # Draw a sub-menu for misc operators.
-        row = second_column.row(align=True)
-        row.ui_units_x = 10
+        # Draw a link to documentation for this add-on.
+        row = second_column.row()
         row.scale_x = 10
         row.scale_y = 1.5
-        row.menu("RYMAT_MT_misc_sub_menu", text="", icon='TOOL_SETTINGS')
+        row.operator("wm.url_open", text="", icon='HELP').url = "https://loganfairbairn.github.io/rymat_documentation.html"
 
         # Draw user interface based on the selected section.
         match panel_properties.sections:
@@ -115,3 +104,11 @@ class RYMAT_PT_Panel(bpy.types.Panel):
 
             case 'SECTION_VIEWPORT_SETTINGS':
                 ui_viewport.draw_viewport_setting_ui(self, context)
+
+            case 'SECTION_APPEND':
+                layout.operator("rymat.append_default_workspace", text="Append Default Workspace", icon='NONE')
+                layout.operator("rymat.append_material_ball", text="Append Material Ball", icon='NONE')
+
+            case 'SECTION_OUTLINES':
+                layout.operator("rymat.add_black_outlines", text="Add Black Outlines", icon='NONE')
+                layout.operator("rymat.remove_outlines", text="Remove Black Outlines", icon='NONE')
