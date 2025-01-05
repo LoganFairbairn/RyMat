@@ -3,6 +3,7 @@
 import bpy
 from ..core import mesh_map_baking
 from ..core import blender_addon_utils as bau
+from . import ui_render_devices
 
 def draw_mesh_map_status(layout, baking_settings):
     '''Draws status and operators for each mesh map type.'''
@@ -126,11 +127,6 @@ def draw_mesh_map_settings(layout, baking_settings):
     row.operator("rymat.open_mesh_map_folder", text="", icon='FILE_FOLDER')
 
     row = first_column.row()
-    row.label(text="Render Device")
-    row = second_column.row()
-    row.prop(bpy.data.scenes["Scene"].cycles, "device", text="")
-
-    row = first_column.row()
     row.label(text="Cage Mode")
     row = second_column.row()
     row.prop(baking_settings, "cage_mode", text="")
@@ -226,6 +222,8 @@ def draw_mesh_map_section_ui(self, context):
 
     layout = self.layout
 
+    # If the user has Cycles turned off in their add-on preferences,
+    # baking will not work, display an error.
     if "cycles" not in bpy.context.preferences.addons:
         layout.label(text="Cycles add-on is not enabled.")
         layout.label(text="Enable Cyles from Blender's add-ons in for baking to work.")
@@ -239,16 +237,7 @@ def draw_mesh_map_section_ui(self, context):
     row.scale_y = 2.0
     row.operator("rymat.batch_bake", text="Bake Mesh Maps")
 
-    # Draw a warning for users using their CPU to bake mesh maps.
-    scene = bpy.data.scenes["Scene"]
-    if scene.cycles.device == 'CPU':
-        row = layout.row()
-        row.separator()
-        row = layout.row()
-        row.alignment = 'CENTER'
-        row.label(text="Baking is slow with CPUs, it's recommended to use your GPU.", icon='ERROR')
-        row = layout.row()
-        row.separator()
+    ui_render_devices.draw_render_device_settings(layout)
 
     draw_mesh_map_status(layout, baking_settings)
     #draw_mesh_map_previews(layout)

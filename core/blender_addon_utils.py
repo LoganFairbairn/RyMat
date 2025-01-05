@@ -654,8 +654,8 @@ def get_valid_enum(enum_items, enum_value, default_value):
         debug_logging.log("Invalid enum: {0}".format(enum_value))
         return default_value
 
-def print_aligned_text(layout, aligned_text, alignment='LEFT'):
+def print_aligned_text(layout, aligned_text, alignment='LEFT', label_icon='NONE'):
     '''Prints a row of center-aligned text.'''
     row = layout.row()
     row.alignment = alignment
-    row.label(text=aligned_text)
+    row.label(text=aligned_text, icon=label_icon)

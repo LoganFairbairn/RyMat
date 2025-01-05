@@ -4,6 +4,7 @@ import bpy
 from bpy.types import Menu
 from ..core import material_layers
 from ..core import blender_addon_utils as bau
+from . import ui_render_devices
 
 def verify_exporting_textures_is_valid(context):
     '''Runs checks to verify if exporting textures is possible. If exporting textures is invalid, an info message will be returned.'''
@@ -34,16 +35,8 @@ def draw_export_textures_ui(self, context):
     row.scale_y = 2.0
     row.operator("rymat.export", text="Export Textures")
 
-    # Draw a warning for users using their CPU to export textures.
-    scene = bpy.data.scenes["Scene"]
-    if scene.cycles.device == 'CPU':
-        row = layout.row()
-        row.separator()
-        row = layout.row()
-        row.alignment = 'CENTER'
-        row.label(text="Exporting is slow with CPUs, it's recommended to use your GPU.", icon='ERROR')
-        row = layout.row()
-        row.separator()
+    # Draw render device settings.
+    ui_render_devices.draw_render_device_settings(layout)
 
     # Draw options for changing the export preset.
     row = layout.row(align=True)
@@ -73,12 +66,6 @@ def draw_export_textures_ui(self, context):
     row.prop(bpy.context.scene, "rymat_export_folder", text="")
     row.operator("rymat.set_export_folder", text="", icon='FOLDER_REDIRECT')
     row.operator("rymat.open_export_folder", text="", icon='FILE_FOLDER')
-
-    # Draw the render device.
-    row = first_column.row()
-    row.label(text="Render Device")
-    row = second_column.row()
-    row.prop(bpy.data.scenes["Scene"].cycles, "device", text="")
 
     # Draw the export mode.
     row = first_column.row()
