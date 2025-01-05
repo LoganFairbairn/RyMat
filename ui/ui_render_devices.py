@@ -20,8 +20,6 @@ def draw_render_device_settings(layout):
     row.label(text="Render Device")
     row = second_column.row()
     scene = bpy.data.scenes["Scene"]
-    if scene.cycles.device == 'CPU':
-        row.label(text="", icon='ERROR')
     row.prop(bpy.data.scenes["Scene"].cycles, "device", text="")
 
     # Draw the (Cycles) render device type.
@@ -29,29 +27,27 @@ def draw_render_device_settings(layout):
     row.label(text="Render Device Type")
     row = second_column.row()
     compute_device_preference = bpy.context.preferences.addons['cycles'].preferences
-    if compute_device_preference.compute_device_type == 'NONE':
-        row.label(text="", icon='ERROR')
     row.prop(compute_device_preference, "compute_device_type", text="")
-
-    split = layout.split(factor=0.05)
-    first_column = split.column()
-    second_column = split.column()
     
     # Draw a warning for users using their CPU to export textures.
     scene = bpy.data.scenes["Scene"]
     if scene.cycles.device == 'CPU':
-        row = first_column.row()
-        row.label(text="", icon='ERROR')
-        row = second_column.row()
-        row.label(text="Exporting is slow with your CPU!")
+        bau.print_aligned_text(
+            layout,
+            aligned_text="Baking is slow with your CPU!",
+            alignment='CENTER',
+            label_icon='ERROR'
+        )
 
     # Draw a warning for users not using a Cycles render device.
     cycles_render_device = bpy.context.preferences.addons['cycles'].preferences.compute_device_type
     if cycles_render_device == 'NONE':
-        row = first_column.row()
-        row.label(text="", icon='ERROR')
-        row = second_column.row()
-        row.label(text="Exporting is slow without a defined render device type!")
+        bau.print_aligned_text(
+            layout,
+            aligned_text="Baking is slow without a defined render device type!",
+            alignment='CENTER',
+            label_icon='ERROR'
+        )
     
     # Draw a separator to visually distiguish this section from other settings.
     layout.separator(type='LINE')
