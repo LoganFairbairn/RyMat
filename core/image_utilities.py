@@ -299,10 +299,10 @@ class RYMAT_OT_edit_texture_node_image_externally(Operator):
 
         return {'FINISHED'}
 
-class RYMAT_OT_export_uvs(Operator):
-    bl_idname = "rymat.export_uvs"
-    bl_label = "Export UVs"
-    bl_description = "Exports the selected object's UV layout to a folder next to the blend file"
+class RYMAT_OT_image_edit_uvs(Operator):
+    bl_idname = "rymat.image_edit_uvs"
+    bl_label = "Image Edit UVs"
+    bl_description = "Exports the selected object's UV layout to the image editor defined in Blender's preferences (Edit -> Preferences -> File Paths -> Applications -> Image Editor)"
 
     def execute(self, context):
         bau.set_valid_material_editing_mode()
@@ -329,37 +329,7 @@ class RYMAT_OT_export_uvs(Operator):
             bpy.ops.uv.select_all(action='SELECT')
             uv_image_name = bpy.context.active_object.name + "_UVs"
 
-        # Save UV layout to a folder.
-        uv_layout_path = bau.get_raw_texture_file_path(uv_image_name, 'PNG')
-        bpy.ops.uv.export_layout(filepath=uv_layout_path, size=(tss.get_texture_width(), tss.get_texture_height()))
-
-        # Reset mode and log completion.
-        bpy.ops.object.mode_set(mode = original_mode)
-        debug_logging.log_status("Exporting UV Layout complete - {0}".format(uv_layout_path), self, type='INFO')
-
-        return{'FINISHED'}
-
-class RYMAT_OT_image_edit_uvs(Operator):
-    bl_idname = "rymat.image_edit_uvs"
-    bl_label = "Image Edit UVs"
-    bl_description = "Exports the selected object's UV layout to the image editor defined in Blender's preferences (Edit -> Preferences -> File Paths -> Applications -> Image Editor)"
-
-    def execute(self, context):
-        bau.set_valid_material_editing_mode()
-        bau.verify_material_operation_context(self)
-
-        original_mode = bpy.context.object.mode
-        active_object = bpy.context.active_object
-
-        if active_object.data.uv_layers.active == None:
-            self.report({'ERROR'}, "Active object has no active UV layout to export UVs for. Add one, or select a different object.")
-            return{'FINISHED'}
-
-        # Set edit mode and select all uvs.
-        bpy.ops.object.mode_set(mode = 'EDIT')
-        bpy.ops.uv.select_all(action='SELECT')
-
-        # Save UV layout to a folder.
+        # Save UV layout to the raw texture folder.
         uv_image_name = bpy.context.active_object.name + "_" + "UVLayout"
         uv_layout_path = bau.get_raw_texture_file_path(uv_image_name, 'PNG')
         bpy.ops.uv.export_layout(filepath=uv_layout_path, size=(tss.get_texture_width(), tss.get_texture_height()))
