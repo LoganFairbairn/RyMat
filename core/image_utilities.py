@@ -109,9 +109,9 @@ class RYMAT_OT_add_texture_node_image(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Creates a new image (uses texture set pixel resolution) and adds it to the specified texture node"
 
-    node_tree_name: StringProperty(default="")
-    node_name: StringProperty(default="")
-    material_channel_name: StringProperty(default="")
+    node_tree_name: StringProperty(default="", options={'HIDDEN'})
+    node_name: StringProperty(default="", options={'HIDDEN'})
+    material_channel_name: StringProperty(default="", options={'HIDDEN'})
 
     def execute(self, context):
         node_group = bpy.data.node_groups.get(self.node_tree_name)
@@ -169,9 +169,9 @@ class RYMAT_OT_import_texture_node_image(Operator, ImportHelper):
     bl_description = "Opens a menu that allows the user to import a texture file into the specified texture node"
     bl_options = {'REGISTER', 'UNDO'}
 
-    node_tree_name: StringProperty(default="")
-    node_name: StringProperty(default="")
-    material_channel_name: StringProperty(default="")
+    node_tree_name: StringProperty(default="", options={'HIDDEN'})
+    node_name: StringProperty(default="", options={'HIDDEN'})
+    material_channel_name: StringProperty(default="", options={'HIDDEN'})
 
     filter_glob: bpy.props.StringProperty(
         default='*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.bmp;*.exr',
@@ -225,8 +225,8 @@ class RYMAT_OT_edit_texture_node_image_externally(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Exports the specified material channel image to the external image editing software defined in Blenders preferences"
 
-    node_tree_name: StringProperty(default="")
-    node_name: StringProperty(default="")
+    node_tree_name: StringProperty(default="", options={'HIDDEN'})
+    node_name: StringProperty(default="", options={'HIDDEN'})
 
     def execute(self, context):
         image_editor_path = bpy.context.preferences.filepaths.image_editor
@@ -268,7 +268,7 @@ class RYMAT_OT_edit_texture_node_image_externally(Operator):
             )
             return {'FINISHED'}
 
-        # If the image is packed, unpack it and save it to the raw texture folder.
+        # If the image is packed, unpack it and save it to the raw texture folder.>
         if texture_node.image.packed_file:
             bau.save_image(
                 texture_node.image,
@@ -377,8 +377,8 @@ class RYMAT_OT_reload_texture_node_image(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Reloads the texture node image from it's associated saved file"
 
-    node_tree_name: StringProperty(default="")
-    node_name: StringProperty(default="")
+    node_tree_name: StringProperty(default="", options={'HIDDEN'})
+    node_name: StringProperty(default="", options={'HIDDEN'})
 
     def execute(self, context):
         node_group = bpy.data.node_groups.get(self.node_tree_name)
@@ -408,8 +408,8 @@ class RYMAT_OT_duplicate_texture_node_image(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Duplicated the texture image stored in the texture node from Blender's data"
 
-    node_tree_name: StringProperty(default="")
-    node_name: StringProperty(default="")
+    node_tree_name: StringProperty(default="", options={'HIDDEN'})
+    node_name: StringProperty(default="", options={'HIDDEN'})
 
     def execute(self, context):
         node_group = bpy.data.node_groups.get(self.node_tree_name)
@@ -436,8 +436,8 @@ class RYMAT_OT_delete_texture_node_image(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Deletes the texture image stored in the texture node from Blender's data, and it's saved file on disk if one exists"
 
-    node_tree_name: StringProperty(default="")
-    node_name: StringProperty(default="")
+    node_tree_name: StringProperty(default="", options={'HIDDEN'})
+    node_name: StringProperty(default="", options={'HIDDEN'})
 
     def execute(self, context):
         node_group = bpy.data.node_groups.get(self.node_tree_name)
