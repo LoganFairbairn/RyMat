@@ -101,6 +101,8 @@ def add_black_outline(outline_object, thickness):
         for node in nodes:
             nodes.remove(node)
         emission_node = nodes.new(type="ShaderNodeEmission")
+        emission_node.name = 'EMISSION'
+        emission_node.label = emission_node.name
         emission_node.location = (-200, 0)
         emission_node.inputs["Color"].default_value = (0, 0, 0, 1)
         emission_node.inputs["Strength"].default_value = 1.0

@@ -110,5 +110,19 @@ class RYMAT_PT_Panel(bpy.types.Panel):
                 layout.operator("rymat.append_material_ball", text="Append Material Ball", icon='NONE')
 
             case 'SECTION_OUTLINES':
-                layout.operator("rymat.add_black_outlines", text="Add Black Outlines", icon='NONE')
-                layout.operator("rymat.remove_outlines", text="Remove Black Outlines", icon='NONE')
+                row = layout.row()
+                row.operator("rymat.add_black_outlines", text="Add Black Outlines", icon='NONE')
+                row.operator("rymat.remove_outlines", text="Remove Black Outlines", icon='NONE')
+
+                outline_material = bpy.data.materials.get("Outline")
+                if outline_material:
+
+                    # Split the UI into a two column layout.
+                    split = layout.split(factor=0.4)
+                    first_column = split.column()
+                    second_column = split.column()
+
+                    row = first_column.row()
+                    row.label(text="Outline Color")
+                    row = second_column.row()
+                    row.prop(outline_material.node_tree.nodes.get('EMISSION').inputs[0], "default_value", text="")
