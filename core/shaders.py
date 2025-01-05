@@ -458,28 +458,38 @@ class RYMAT_shader_material_channel(PropertyGroup):
     socket_float_default: FloatProperty(
         name="Channel Float Default",
         description="Defines the default value for the shader channel",
-        default=0.0
+        default=0.0,
+        soft_min=-10.0,
+        soft_max=10.0
     )
     socket_float_min: FloatProperty(
         name="Channel Float Min",
         description="Defines the minimum value for the float shader channel",
-        default=0.0
+        default=0.0,
+        soft_min=-10.0,
+        soft_max=10.0
     )
     socket_float_max: FloatProperty(
         name="Channel Float Max",
         description="The maximum value for the float shader channel",
-        default=1.0
+        default=1.0,
+        soft_min=-10.0,
+        soft_max=10.0
     )
     socket_color_default: FloatVectorProperty(
         name="Channel Color Default",
         description="The shader channels default color value",
         subtype='COLOR',
-        default=[0.0, 0.0, 0.0]
+        default=[0.0, 0.0, 0.0],
+        soft_min=0.0,
+        soft_max=1.0
     )
     socket_vector_default: FloatVectorProperty(
         name="Channel Vector Default",
         description="The shader channels default vector value",
-        default=[0.0, 0.0, 0.0]
+        default=[0.0, 0.0, 0.0],
+        soft_min=-10.0,
+        soft_max=10.0
     )
     default_blend_mode: EnumProperty(
         name="Default Blend Mode",
