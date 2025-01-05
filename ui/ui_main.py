@@ -14,7 +14,7 @@ def update_main_ui_sections(self, context):
     '''Callback function for updating data when the main user interface tab is changed.'''
 
     # Read json data for available shaders when the shader tab is selected.
-    if context.scene.rymat_panel_properties.sections == 'SECTION_SETTINGS':
+    if context.scene.rymat_panel_properties.sections == 'SECTION_SHADER_SETTINGS':
         shaders.update_shader_list()
 
     # Read the available export templates when the export tab is selected.
