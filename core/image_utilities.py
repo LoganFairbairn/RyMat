@@ -232,7 +232,7 @@ class RYMAT_OT_edit_texture_node_image_externally(Operator):
         image_editor_path = bpy.context.preferences.filepaths.image_editor
         if not image_editor_path:
             debug_logging.log_status("Image editor path isn't defined.", self, type='ERROR')
-            return {'FINISHED'}
+            return {'CANCELLED'}
 
         node_group = bpy.data.node_groups.get(self.node_tree_name)
         if not node_group:
@@ -241,7 +241,7 @@ class RYMAT_OT_edit_texture_node_image_externally(Operator):
                 self, 
                 type='ERROR'
             )
-            return {'FINISHED'}
+            return {'CANCELLED'}
 
         if self.node_name == "":
             debug_logging.log_status(
@@ -249,7 +249,7 @@ class RYMAT_OT_edit_texture_node_image_externally(Operator):
                 self, 
                 type='ERROR'
             )
-            return {'FINISHED'}
+            return {'CANCELLED'}
         
         texture_node = node_group.nodes.get(self.node_name)
         if not texture_node:
@@ -258,7 +258,15 @@ class RYMAT_OT_edit_texture_node_image_externally(Operator):
                 self, 
                 type='ERROR'
             )
-            return {'FINISHED'}
+            return {'CANCELLED'}
+        
+        if texture_node.image == None:
+            debug_logging.log_status(
+                "No image to edit externally.",
+                self,
+                type='ERROR'
+            )
+            return {'CANCELLED'}
 
         if bau.check_blend_saved() == False:
             debug_logging.log_status(
@@ -283,7 +291,7 @@ class RYMAT_OT_edit_texture_node_image_externally(Operator):
         
         # Abort the operation if the image still has no data loaded into blend memory.
         if not texture_node.image.has_data:
-            return {'FINISHED'}
+            return {'CANCELLED'}
 
         # Select and then export the image to the external image editing software.
         bau.set_texture_paint_image(texture_node.image)
