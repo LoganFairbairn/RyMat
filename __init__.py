@@ -27,7 +27,7 @@ from .preferences import AddonPreferences
 from .core.texture_set_settings import RYMAT_texture_set_settings, RYMAT_OT_set_raw_texture_folder, RYMAT_OT_open_raw_texture_folder
 
 # Shaders
-from .core.shaders import RYMAT_shader_name, RYMAT_shader_material_channel, RYMAT_shader_unlayered_property, RYMAT_shader_info, RYMAT_OT_set_shader, RYMAT_OT_new_shader, RYMAT_OT_save_shader, RYMAT_OT_delete_shader, RYMAT_OT_add_shader_channel, RYMAT_OT_delete_shader_channel, RYMAT_OT_create_shader_from_nodetree, RYMAT_OT_apply_default_shader, update_shader_list, set_shader
+from .core.shaders import RYMAT_shader_name, RYMAT_shader_material_channel, RYMAT_shader_unlayered_property, RYMAT_shader_info, RYMAT_OT_set_shader, RYMAT_OT_new_shader, RYMAT_OT_save_shader, RYMAT_OT_delete_shader, RYMAT_OT_add_shader_channel, RYMAT_OT_delete_shader_channel, RYMAT_OT_create_shader_from_nodetree, RYMAT_OT_apply_default_shader, update_shader_list
 
 # Material Layers
 from .core.material_layers import RYMAT_layer_stack, RYMAT_layers, RYMAT_OT_add_material_layer,RYMAT_OT_add_decal_material_layer, RYMAT_OT_add_image_layer, RYMAT_OT_delete_layer, RYMAT_OT_duplicate_layer, RYMAT_OT_move_material_layer_up, RYMAT_OT_move_material_layer_down,RYMAT_OT_toggle_material_channel_preview, RYMAT_OT_toggle_hide_layer, RYMAT_OT_set_layer_projection,RYMAT_OT_change_material_channel_value_node, RYMAT_OT_isolate_material_channel,RYMAT_OT_show_compiled_material, RYMAT_OT_toggle_image_alpha_blending, RYMAT_OT_set_material_channel, RYMAT_OT_set_matchannel_crgba_output, RYMAT_OT_set_layer_blending_mode, RYMAT_OT_merge_with_layer_below, RYMAT_OT_add_material_channel_nodes, RYMAT_OT_delete_material_channel_nodes, refresh_layer_stack, shader_node_tree_update
@@ -294,11 +294,8 @@ def load_handler(dummy):
 
         refresh_layer_stack()
     
-    # Apply a default shader setup when a blend file is loaded if there is no shader node defined.
+    # Update the shader list when a new blend file is loaded.
     update_shader_list()
-    shader_info = bpy.context.scene.rymat_shader_info
-    if shader_info.shader_node_group == None:
-        set_shader('MetallicRoughnessPBR')
 
 def register():
     # Register properties, operators and pannels.
