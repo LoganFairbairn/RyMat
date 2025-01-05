@@ -72,7 +72,7 @@ class RyMatMainPanel(bpy.types.Panel):
         row.scale_y = 1.5
         row.prop_enum(panel_properties, "sections", 'SECTION_EDIT_MATERIALS', text="", icon='MATERIAL')
         row.prop_enum(panel_properties, "sections", "SECTION_MESH_MAPS", text="", icon='FACE_MAPS')
-        row.prop_enum(panel_properties, "sections", 'SECTION_OUTLINES', text="", icon='LINE_DATA')
+        row.prop_enum(panel_properties, "sections", 'SECTION_OUTLINES', text="", icon='KEY_RING')
         row.prop_enum(panel_properties, "sections", 'SECTION_APPEND', text="", icon='APPEND_BLEND')
         row.prop_enum(panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="", icon='MATSHADERBALL')
         row.prop_enum(panel_properties, "sections", 'SECTION_VIEWPORT_SETTINGS', text="", icon='VIEW3D')
