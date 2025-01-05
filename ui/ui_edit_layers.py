@@ -804,11 +804,11 @@ class ImageUtilitySubMenu(Menu):
             operator.node_name = context.node.name
             operator.material_channel_name = material_channel_name
 
-            operator = layout.operator("rymat.edit_texture_node_image_externally", text="Edit Image Externally", icon='NONE')
+            operator = layout.operator("rymat.edit_texture_node_image_externally", text="Edit in 2D App", icon='NONE')
             operator.node_tree_name = context.node_tree.name
             operator.node_name = context.node.name
             
-            operator = layout.operator("rymat.image_edit_uvs", text="Externally Image Edit UVs", icon='NONE')
+            operator = layout.operator("rymat.image_edit_uvs", text="Export UVs to 2D App", icon='NONE')
 
             operator = layout.operator("rymat.reload_texture_node_image", text="Reload Image", icon='NONE')
             operator.node_tree_name = context.node_tree.name
