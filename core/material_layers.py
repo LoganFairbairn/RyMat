@@ -33,6 +33,18 @@ PROJECTION_TEXTURE_SAMPLE_COUNTS = {
     'DECAL': 1
 }
 
+SEPARATE_RGB_NODE_OUTPUT_INDEX =  {
+    'RED': 0,
+    'GREEN': 1,
+    'BLUE': 2
+}
+
+# Input index mapping for connecting to material channel mix nodes based on the static node type.
+MIX_NODE_INPUT_INDEX = {
+    'GROUP': 2,
+    'MIX': 7
+}
+
 #----------------------------- UPDATING PROPERTIES -----------------------------#
 
 
@@ -126,22 +138,6 @@ def sync_triplanar_nodes():
                     if texture_sample_3.interpolation != texture_sample_1.interpolation:
                         texture_sample_3.interpolation = texture_sample_1.interpolation
 
-def link_custom_group_nodes():
-    '''Links custom group nodes.'''
-    shader_info = bpy.context.scene.rymat_shader_info
-    for channel in shader_info.material_channels:
-        selected_layer_index = bpy.context.scene.rymat_layer_stack.selected_layer_index
-        value_node = get_material_layer_node('VALUE', selected_layer_index, channel.name)
-        if value_node:
-            if len(value_node.outputs) > 0:
-                if len(value_node.outputs[0].links) == 0:
-                    output_channel = get_material_channel_crgba_output(channel.name)
-                    relink_material_channel(
-                        relink_material_channel_name=channel.name, 
-                        original_output_channel=output_channel, 
-                        unlink_projection=True
-                    )
-
 def shader_node_tree_update():
     '''Updates properties when the shader nodetree is changed.'''
 
@@ -151,7 +147,6 @@ def shader_node_tree_update():
     
     # Perform updates that should occur after a shader nodetree change is detected.
     sync_triplanar_nodes()
-    link_custom_group_nodes()
 
 def parse_layer_index(layer_group_node_name):
     '''Return the layers's index by parsing the layer group node name. Returns -1 if there is no active object'''
@@ -1813,31 +1808,25 @@ def get_material_channel_output_node(material_channel_name, layer_index):
 def set_material_channel_crgba_output(material_channel_name, crgba_output, layer_index):
     '''Relinks material channel nodes to output the specified Color / RGBA channel.'''
 
-    # TODO: Use get_material_channel_output_node here.
+    # If there is no mix node, throw an error.
+    mix_node = get_material_layer_node('MIX', layer_index, material_channel_name)
+    if mix_node == None:
+        debug_logging.log(
+            "Can't set material channel CRGBA output, no mix node exists.",
+            message_type='ERROR',
+            sub_process=False
+        )
+        return
+
     # Determine the node that effectively outputs the material channel value.
-    projection_node = get_material_layer_node('PROJECTION', layer_index)
     value_node = get_material_layer_node('VALUE', layer_index, material_channel_name)
-    channel_output_node = None
-    if projection_node.node_tree.name == 'RY_TriplanarProjection' or projection_node.node_tree.name == 'RY_TriplanarHexGridProjection':
-        if value_node.bl_static_type == 'TEX_IMAGE':
-            channel_output_node = get_material_layer_node('TRIPLANAR_BLEND', layer_index, material_channel_name)
-        else:
-            channel_output_node = value_node
-    else:
-        if material_channel_name == 'NORMAL':
-            fix_normal_rotation_node = get_material_layer_node('FIX_NORMAL_ROTATION', layer_index, material_channel_name)
-            if fix_normal_rotation_node:
-                channel_output_node = fix_normal_rotation_node
-            else:
-                debug_logging.log("Fix normal rotation node missing.", message_type='ERROR')
-        else:
-            channel_output_node = get_material_layer_node('VALUE', layer_index, material_channel_name)
+    channel_output_node = get_material_channel_output_node(material_channel_name, layer_index)
 
     # Determine if a separate RGB node is required.
     if crgba_output == 'RED' or crgba_output == 'BLUE' or crgba_output == 'GREEN':
-        connect_separate_rgb = True
+        use_separate_rgb_node = True
     else:
-        connect_separate_rgb = False
+        use_separate_rgb_node = False
     
     # Determine if connecting to a filter is required.
     connect_filters = False
@@ -1852,31 +1841,39 @@ def set_material_channel_crgba_output(material_channel_name, crgba_output, layer
     bau.unlink_node(channel_output_node, layer_node_tree, unlink_inputs=False, unlink_outputs=True)
     bau.unlink_node(separate_rgb_node, layer_node_tree, unlink_inputs=True, unlink_outputs=True)
 
-    # Connect the nodes to the mix material channel ndoe based on the material channel and it's settings.
-    mix_node = get_material_layer_node('MIX', layer_index, material_channel_name)
-    if connect_separate_rgb:
+    # If the channel is using an image texture node, always link it's alpha to the mix image alpha node.
+    output_node_index = 0
+    mix_image_alpha_node = get_material_layer_node('MIX_IMAGE_ALPHA', layer_index, material_channel_name)
+    if value_node.bl_static_type == 'TEX_IMAGE':
+        bau.safe_node_link(channel_output_node.outputs[1], mix_image_alpha_node.inputs[1], layer_node_tree)
+
+        # If the desired output channel is alpha, adjust the output index.
+        if crgba_output == 'ALPHA':
+            output_node_index = 1
+    
+    # Link the output / separate node to the material channel mix node, or filter nodes.
+    if use_separate_rgb_node:
+        rgb_output_index = SEPARATE_RGB_NODE_OUTPUT_INDEX[crgba_output]
+        mix_node_input = MIX_NODE_INPUT_INDEX[mix_node.bl_static_type]
+        bau.safe_node_link(separate_rgb_node.outputs[rgb_output_index], mix_node.inputs[mix_node_input], layer_node_tree)
         bau.safe_node_link(channel_output_node.outputs[0], separate_rgb_node.inputs[0], layer_node_tree)
+
+    # If the separate RGB node is not required, connect the output node to the mix node,
+    # or to the last filter node.
     else:
         if connect_filters:
             first_filter_node = material_filters.get_filter_node(material_channel_name, 1)
             filter_type = material_filters.get_filter_type(first_filter_node)
             filter_input = material_filters.get_filter_info(filter_type, "main_input_socket")
             filter_output = material_filters.get_filter_info(filter_type, "main_output_socket")
-            bau.safe_node_link(channel_output_node.outputs[0], first_filter_node.inputs[filter_input], layer_node_tree)
-            if mix_node.bl_static_type == 'GROUP':
-                bau.safe_node_link(last_filter_node.outputs[filter_output], mix_node.inputs[2], layer_node_tree)
-            else:
-                bau.safe_node_link(last_filter_node.outputs[filter_output], mix_node.inputs[7], layer_node_tree)
-        else:
-            if mix_node.bl_static_type == 'GROUP':
-                bau.safe_node_link(channel_output_node.outputs[0], mix_node.inputs[2], layer_node_tree)
-            else:
-                bau.safe_node_link(channel_output_node.outputs[0], mix_node.inputs[7], layer_node_tree)
+            bau.safe_node_link(channel_output_node.outputs[output_node_index], first_filter_node.inputs[filter_input], layer_node_tree)
 
-    # Always link alpha to opacity if the value node is using an image texture node.
-    mix_image_alpha_node = get_material_layer_node('MIX_IMAGE_ALPHA', layer_index, material_channel_name)
-    if value_node.bl_static_type == 'TEX_IMAGE':
-        bau.safe_node_link(channel_output_node.outputs[1], mix_image_alpha_node.inputs[1], layer_node_tree)
+            mix_node_input = MIX_NODE_INPUT_INDEX[mix_node.bl_static_type]
+            bau.safe_node_link(last_filter_node.outputs[filter_output], mix_node.inputs[mix_node_input], layer_node_tree)
+        
+        else:
+            mix_node_input = MIX_NODE_INPUT_INDEX[mix_node.bl_static_type]
+            bau.safe_node_link(channel_output_node.outputs[output_node_index], mix_node.inputs[mix_node_input], layer_node_tree)
 
 def isolate_material_channel(material_channel_name):
     '''Isolates the specified material channel by linking the specified material channel output to an isolate (emission) node.'''
