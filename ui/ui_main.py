@@ -56,28 +56,28 @@ class RyMatMainPanel(bpy.types.Panel):
 
         panel_properties = context.scene.rymat_panel_properties
 
-        split = first_column.split(factor=0.1)
+        split = first_column.split(factor=0.75)
         first_sub_column = split.column()
         second_sub_column = split.column()
 
-        # Draw an operator to save all textures in the blend file.
-        row = first_sub_column.row()
-        row.scale_x = 10
-        row.scale_y = 1.5
-        row.operator("rymat.save_all_textures", text="", icon='FILE_TICK')
-        
-        # Draw a top bar with tabs for accessing different menus of the add-on.
-        row = second_sub_column.row(align=True)
+        # Draw tabs for accessing different sections in this add-on.
+        row = first_sub_column.row(align=True)
         row.scale_x = 10
         row.scale_y = 1.5
         row.prop_enum(panel_properties, "sections", 'SECTION_EDIT_MATERIALS', text="", icon='MATERIAL')
         row.prop_enum(panel_properties, "sections", "SECTION_MESH_MAPS", text="", icon='FACE_MAPS')
-        row.prop_enum(panel_properties, "sections", 'SECTION_OUTLINES', text="", icon='KEY_RING')
-        row.prop_enum(panel_properties, "sections", 'SECTION_APPEND', text="", icon='APPEND_BLEND')
+        row.prop_enum(panel_properties, "sections", 'SECTION_TEXTURE_SETTINGS', text="", icon='IMAGE_DATA')
         row.prop_enum(panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="", icon='MATSHADERBALL')
+        row.prop_enum(panel_properties, "sections", 'SECTION_OUTLINES', text="", icon='KEY_RING')
         row.prop_enum(panel_properties, "sections", 'SECTION_VIEWPORT_SETTINGS', text="", icon='VIEW3D')
-        row.prop_enum(panel_properties, "sections", 'SECTION_TEXTURE_SETTINGS', text="", icon='TEXTURE')
         row.prop_enum(panel_properties, "sections", 'SECTION_EXPORT_TEXTURES', text="", icon='EXPORT')
+        
+        # Draw operators for saving and managing assets.
+        row = second_sub_column.row(align=True)
+        row.scale_x = 10
+        row.scale_y = 1.5
+        row.operator("rymat.save_all_textures", text="", icon='FILE_TICK')
+        row.prop_enum(panel_properties, "sections", 'SECTION_APPEND', text="", icon='APPEND_BLEND')
 
         # Draw a link to documentation for this add-on.
         row = second_column.row()
