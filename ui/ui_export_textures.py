@@ -45,20 +45,18 @@ def draw_export_textures_ui(self, context):
         row = layout.row()
         row.separator()
 
-    # Split the UI into a two column layout.
-    split = layout.split(factor=0.4)
-    first_column = split.column()
-    second_column = split.column()
-
     # Draw options for changing the export preset.
+    row = layout.row(align=True)
     texture_export_settings = bpy.context.scene.rymat_texture_export_settings
-    row = first_column.row()
-    row.label(text="Export Preset")
-    row = second_column.row(align=True)
     row.menu("RYMAT_MT_export_preset_menu", text="Select Preset")
     row.operator("rymat.save_export_template", text="", icon='FILE_TICK')
     row.operator("rymat.refresh_export_template_list", text="", icon='FILE_REFRESH')
     row.operator("rymat.delete_export_template", text="", icon='TRASH')
+
+    # Split the UI into a two column layout.
+    split = layout.split(factor=0.4)
+    first_column = split.column()
+    second_column = split.column()
     
     # Draw the name of the active export preset.
     texture_export_settings = bpy.context.scene.rymat_texture_export_settings

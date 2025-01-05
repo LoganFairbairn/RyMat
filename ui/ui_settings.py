@@ -73,20 +73,19 @@ def draw_texture_setting_ui(layout):
 
 def draw_shader_setting_ui(layout):
     '''Draws shader setting user interface for this add-on.'''
-    # Split the UI into a two column layout.
-    split = layout.split(factor=0.4)
-    first_column = split.column()
-    second_column = split.column()
 
     # Draw options to edit the selected shader preset.
-    row = first_column.row()
-    row.label(text="Shader Preset")
-    row = second_column.row(align=True)
+    row = layout.row(align=True)
     row.menu("RYMAT_MT_shader_sub_menu", text="Select Shader")
     row.operator("rymat.new_shader", text="", icon='ADD')
     row.operator("rymat.save_shader", text="", icon='FILE_TICK')
     row.operator("rymat.create_shader_from_nodetree", text="", icon='NODETREE')
     row.operator("rymat.delete_shader", text="", icon='TRASH')
+
+    # Split the UI into a two column layout.
+    split = layout.split(factor=0.4)
+    first_column = split.column()
+    second_column = split.column()
 
     # Draw the selected shader, and operators to change or edit the shader.
     shader_info = bpy.context.scene.rymat_shader_info
