@@ -38,7 +38,7 @@ class RYMAT_panel_properties(bpy.types.PropertyGroup):
         update=update_main_ui_sections
     )
 
-class RYMAT_PT_Panel(bpy.types.Panel):
+class RyMatMainPanel(bpy.types.Panel):
     bl_label = "RyMat 1.0.0"
     bl_idname = "RYMAT_PT_main_panel"
     bl_space_type = 'VIEW_3D'
