@@ -1,63 +1,26 @@
 # RyMat
 
-RyMat is a free and open-source libre add-on that drastically speeds up and simplifies the material editing workflow by providing a wrapper user interface for Blender's vanilla material nodes. You can use RyMat to make optimized, professional quality materials and textures for game engines, VRChat, still renders, movies and more.
+### Note: This add-on is currently in testing.
 
-I've invested over 2000 hours over the past 3 years to designing, programming, researching, testing and making assets for RyMat so there will be a great, free 3D material editing solution available, and everyone will have the freedom to create.
-
-Get the latest release here: https://github.com/LoganFairbairn/rymat/releases
+RyMat is my personal add-on for Blender made to speed up and simplify the material editing workflow within Blender. I've invested well over 2500 hours over the past 4 years designing, programming, researching and testing to make this software a powerful addition to Blender. RyMat can be used to make optimized, professional quality textures for models used in Unity, Unreal Engine, VRChat, and much more. This add-on is free and open-source software, so everyone has the freedom to create.
 
 Cheers!
 
-## Features
+## Main Features
 
-- PBR material layer stack user interface.
-![alt text](https://raw.githubusercontent.com/LoganFairbairn/rymat/main/promo/LayeredMaterialBall.png?raw=true)
-
-- One-click mesh map baking for high poly to low poly normals, ambient occlusion, curvature, thickness, and world space normals.
-![alt text](https://raw.githubusercontent.com/LoganFairbairn/rymat/main/promo/MaterialBall_MeshMapBakes.png?raw=true)
-
-- One-click texture exporting for common formats and software.
-![alt text](https://raw.githubusercontent.com/LoganFairbairn/rymat/main/promo/ExportingWithChannelPacking.png?raw=true)
-
-- Appendable workspace ideal for material editing with RyMat.
-- Fast texture set importing.
-- Triplanar projection.
-- The ability to merge materials with automatic mesh map application (a.k.a smart materials).
-- The ability to export all materials on an object to a single texture set.
-- Full global and per layer texture set control.
-- Integrated default filters for material channels.
-- Multi-masking for material layers.
-- Custom export templates with texture channel packing.
-- Non-destructive decal layers.
-- Auto-corrections for normal map rotations.
-- Blending modes for normal maps (re-oriented normal blending among others).
-- Support for adding custom group nodes to layers.
-- Integrated blurring for textures.
-- Basic brush presets.
-- Automatic image file management options.
-- HDRI setup for rendered view.
-- Custom atlasing support.
-
-## Limitations & Issues
-
-- No UDIM support (currently).
-- Usage of only 1 UV map per object is supported (currently).
-- No ID map baking (currently).
-- No material layer folders.
-
-## Tips
-
-- Only edit materials made with RyMat through the add-on interface. RyMat materials are created using strict formatting to allow them to be read into the interface properly, editing the nodes manually will cause errors. If you need custom materials or effects, you can add custom group nodes into the material channels through the interface.
-- Most user interface elements have detailed tooltips when you hover your mouse over them.
+- Layer based user interface and workflow
+- One-click high to low poly mesh map baking
+- One-click exporting with custom channel packing
+- One-click importing for texture sets
+- Fast switches for complex projection methods
+- Easy projection based application for decals
+- Support for layering custom shader node setups
 
 ## FAQ
 
-Q: Why should I use RyMat over other material solutions?
-- RyMat is 100% free.
+Q: Why would I use RyMat over other material editing software?
+- RyMat is 100% free, no monthly subscription, no one-time payment required.
 - You can keep your workflow within Blender.
 - You support free and open-source software.
-- You can mod RyMat to improve your workflow with Python scripting.
 - Your privacy is important to you, this add-on has no telemetry.
-
-## System Requirements
-Supported Platforms: Windows, Linux
+- If you have the skills, you can mod this add-on to suit your needs.
