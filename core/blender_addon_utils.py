@@ -2,7 +2,6 @@
 
 import bpy
 from bpy.utils import resource_path
-from bpy.types import Operator
 import numpy as np
 import random
 import os
