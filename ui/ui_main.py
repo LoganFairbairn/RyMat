@@ -26,14 +26,14 @@ class RYMAT_panel_properties(bpy.types.PropertyGroup):
         items=[('SECTION_EDIT_MATERIALS', "Edit Layers", "This section contains operators to edit material layers."),
                ('SECTION_MESH_MAPS', "Mesh Maps", "This section contains operations to quickly bake mesh map textures for your models. Baking mesh maps transfer 3D data such as shadows, curvature, sharp edges and extra detail from higher polycount objects to image textures. Baked mesh map textures can be used as textures in layers in many different ways to make the texturing process faster. One example of where baked mesh maps could be used is to mask dirt by using the baked ambient occlusion as a mask."),
                ('SECTION_EXPORT_TEXTURES', "Export Textures", "This section contains operations to quickly export textures made with RyMat."),
-               ('SECTION_TEXTURE_SETTINGS', "TEXTURE SETTINGS", "Settings that defined how materials and textures are created by this add-on."),
+               ('SECTION_TEXTURE_SETTINGS', "Texture Settings", "Settings that defined how materials and textures are created by this add-on."),
                ('SECTION_SHADER_SETTINGS', "Shader Settings", "Settings for shader node setups."),
-               ('SECTION_VIEWPORT_SETTINGS', "VIEWPORT", "This section contains select viewport render settings to help preview materials"),
-               ('SECTION_APPEND', "VIEWPORT", "This section operators to append useful assets to your blend file"),
-               ('SECTION_OUTLINES', "VIEWPORT", "This section operators to apply and edit outline effects for toon shaders")
+               ('SECTION_VIEWPORT_SETTINGS', "Viewport Settings", "This section contains select viewport render settings to help preview materials"),
+               ('SECTION_APPEND', "Append", "This section operators to append useful assets to your blend file"),
+               ('SECTION_OUTLINES', "Outlines", "This section operators to apply and edit outline effects for toon shaders")
         ],
         name="RyMat Sections",
-        description="Current rymat category",
+        description="User Interface Section",
         default='SECTION_EDIT_MATERIALS',
         update=update_main_ui_sections
     )
@@ -68,7 +68,7 @@ class RyMatMainPanel(bpy.types.Panel):
         row.prop_enum(panel_properties, "sections", "SECTION_MESH_MAPS", text="", icon='FACE_MAPS')
         row.prop_enum(panel_properties, "sections", 'SECTION_TEXTURE_SETTINGS', text="", icon='IMAGE_DATA')
         row.prop_enum(panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="", icon='MATSHADERBALL')
-        row.prop_enum(panel_properties, "sections", 'SECTION_OUTLINES', text="", icon='KEY_RING')
+        row.prop_enum(panel_properties, "sections", 'SECTION_OUTLINES', text="", icon='MATSPHERE')
         row.prop_enum(panel_properties, "sections", 'SECTION_VIEWPORT_SETTINGS', text="", icon='VIEW3D')
         row.prop_enum(panel_properties, "sections", 'SECTION_EXPORT_TEXTURES', text="", icon='EXPORT')
         
