@@ -1452,7 +1452,7 @@ def relink_material_channel(relink_material_channel_name="", original_output_cha
                             layer_node_tree.links.new(value_node.outputs.get('Color'), triplanar_blend_node.inputs[i])
                             layer_node_tree.links.new(value_node.outputs.get('Alpha'), triplanar_blend_node.inputs[i + 3])
                             layer_node_tree.links.new(projection_node.outputs.get('AxisMask'), triplanar_blend_node.inputs.get('AxisMask'))
-                            if channel.name == 'NORMAL':
+                            if static_matchannel_name == 'NORMAL':
                                 layer_node_tree.links.new(projection_node.outputs.get('Rotation'), triplanar_blend_node.inputs.get('Rotation'))
                                 layer_node_tree.links.new(projection_node.outputs.get('SignedGeometryNormals'), triplanar_blend_node.inputs.get('SignedGeometryNormals'))
 
