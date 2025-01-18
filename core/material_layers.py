@@ -1522,7 +1522,7 @@ def relink_material_channel(relink_material_channel_name="", original_output_cha
                         # Link triplanar blending node.
                         layer_node_tree.links.new(projection_node.outputs.get('AxisMask'), triplanar_blend_node.inputs.get('AxisMask'))
 
-                case 'RY_UVProjection':
+                case _:
                     value_node = get_material_layer_node('VALUE', selected_layer_index, channel.name)
                     if value_node.bl_static_type == 'TEX_IMAGE':
                         layer_node_tree.links.new(projection_output_node.outputs[0], value_node.inputs[0])
