@@ -150,11 +150,6 @@ class RYMAT_OT_add_texture_node_image(Operator):
         if self.material_channel_name != "":
             set_default_image_colorspace(new_image, self.material_channel_name)
 
-        # Save the imported image to an external folder next to the blend file.
-        image = bpy.data.images[image_name]
-        if image:
-            bau.save_image(image, file_format='PNG', image_category='RAW_TEXTURE', colorspace='sRGB')
-
         # Add the new image to the image node.
         texture_node.image = new_image
 
