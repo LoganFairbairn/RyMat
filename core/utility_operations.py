@@ -126,7 +126,7 @@ def add_black_outline(outline_object, thickness):
     if outline_modifier_name not in outline_object.modifiers:
         solidify = outline_object.modifiers.new(name=outline_modifier_name, type='SOLIDIFY')
         solidify.thickness = thickness
-        solidify.offset = -1
+        solidify.offset = 1
         solidify.use_flip_normals = True
         solidify.use_quality_normals = True
         solidify.material_offset = len(outline_object.data.materials) - 1
