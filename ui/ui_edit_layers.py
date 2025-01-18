@@ -106,6 +106,11 @@ def draw_edit_layers_ui(self, context):
         bau.print_aligned_text(layout, "No Active Object", alignment='CENTER')
         return
     
+    # Print info for when the object is not a mesh.
+    if active_object.type != 'MESH':
+        bau.print_aligned_text(layout, "Active Object is Not a Mesh", alignment='CENTER')
+        return
+
     # Print user info about hidden objects.
     if active_object.hide_get():
         bau.print_aligned_text(layout, "Active Object Hidden", alignment='CENTER')
@@ -126,7 +131,6 @@ def draw_edit_layers_ui(self, context):
         # Draw a button to open shader settings.
         column.prop_enum(context.scene.rymat_panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="Open Shader Settings")
         return
-
 
     # Print info for when the active material isn't made with this add-on.
     active_material = active_object.active_material
@@ -527,6 +531,19 @@ def draw_masks_tab(layout):
         draw_mask_projection(layout)
         draw_mask_mesh_maps(layout, selected_layer_index, selected_mask_index)
 
+def get_main_panel_context():
+    '''Returns true if the context is correct to draw the main panels.'''
+    if bpy.context.scene.rymat_panel_properties.sections != 'SECTION_EDIT_MATERIALS':
+        return False
+    
+    if bpy.context.scene.rymat_shader_info.shader_node_group == None:
+        return False
+
+    if bpy.context.view_layer.objects.active.type != 'MESH':
+        return False
+    
+    return True
+
 class MaterialSelectorPanel(Panel):
     bl_label = "Material Selector"
     bl_idname = "RYMAT_PT_material_selector_panel"
@@ -537,7 +554,7 @@ class MaterialSelectorPanel(Panel):
     # Only draw this panel when the edit materials section is selected.
     @ classmethod
     def poll(cls, context):
-        return context.scene.rymat_panel_properties.sections == 'SECTION_EDIT_MATERIALS' and bpy.context.scene.rymat_shader_info.shader_node_group
+        return get_main_panel_context()
 
     def draw(self, context):        
         layout = self.layout
@@ -612,7 +629,7 @@ class ColorPalettePanel(Panel):
     # Only draw this panel when the edit materials section is selected.
     @ classmethod
     def poll(cls, context):
-        return context.scene.rymat_panel_properties.sections == 'SECTION_EDIT_MATERIALS' and bpy.context.scene.rymat_shader_info.shader_node_group
+        return get_main_panel_context()
 
     def draw(self, context):
         layout = self.layout
@@ -635,7 +652,7 @@ class MaterialPropertiesPanel(Panel):
     # Only draw this panel when the edit materials section is selected.
     @ classmethod
     def poll(cls, context):
-        return context.scene.rymat_panel_properties.sections == 'SECTION_EDIT_MATERIALS' and bpy.context.scene.rymat_shader_info.shader_node_group
+        return get_main_panel_context()
 
     def draw(self, context):
         layout = self.layout
