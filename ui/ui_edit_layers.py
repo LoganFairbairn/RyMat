@@ -121,7 +121,7 @@ def draw_edit_layers_ui(self, context):
         row = layout.row()
         row.alignment = 'CENTER'
         column = row.column()
-        column.operator("rymat.apply_default_shader")
+        column.operator("rymat.apply_default_shader", text="Apply Default Shader")
 
         # Draw a button to open shader settings.
         column.prop_enum(context.scene.rymat_panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="Open Shader Settings")
@@ -541,7 +541,7 @@ class MaterialSelectorPanel(Panel):
     # Only draw this panel when the edit materials section is selected.
     @ classmethod
     def poll(cls, context):
-        return context.scene.rymat_panel_properties.sections == 'SECTION_EDIT_MATERIALS'
+        return context.scene.rymat_panel_properties.sections == 'SECTION_EDIT_MATERIALS' and bpy.context.scene.rymat_shader_info.shader_node_group
 
     def draw(self, context):        
         layout = self.layout
@@ -616,7 +616,7 @@ class ColorPalettePanel(Panel):
     # Only draw this panel when the edit materials section is selected.
     @ classmethod
     def poll(cls, context):
-        return context.scene.rymat_panel_properties.sections == 'SECTION_EDIT_MATERIALS'
+        return context.scene.rymat_panel_properties.sections == 'SECTION_EDIT_MATERIALS' and bpy.context.scene.rymat_shader_info.shader_node_group
 
     def draw(self, context):
         layout = self.layout
@@ -639,7 +639,7 @@ class MaterialPropertiesPanel(Panel):
     # Only draw this panel when the edit materials section is selected.
     @ classmethod
     def poll(cls, context):
-        return context.scene.rymat_panel_properties.sections == 'SECTION_EDIT_MATERIALS'
+        return context.scene.rymat_panel_properties.sections == 'SECTION_EDIT_MATERIALS' and bpy.context.scene.rymat_shader_info.shader_node_group
 
     def draw(self, context):
         layout = self.layout
