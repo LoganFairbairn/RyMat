@@ -6,8 +6,8 @@ from ..core import image_utilities                  # For access to image relate
 from ..core import material_layers                  # For accessing material layer nodes.
 from ..core import layer_masks                      # For editing layer masks.
 from ..core import blender_addon_utils as bau       # For extra helpful Blender utilities.
-from ..core import texture_set_settings as tss      # For access to texture set settings.
 from ..core import export_textures                  # For access to the invert image function.
+from ..core import shaders                          # For access to shader settings.
 import os                                           # For saving layer images.
 import re                                           # For splitting strings using regex to identify material channels.
 
@@ -154,6 +154,7 @@ class RYMAT_OT_import_texture_set(Operator, ImportHelper):
         selected_layer_index = bpy.context.scene.rymat_layer_stack.selected_layer_index
         layer_type = material_layers.get_layer_type()
         layer_node = material_layers.get_material_layer_node('LAYER', selected_layer_index)
+        shader_info = bpy.context.scene.rymat_shader_info
         
         # Compile a list of all unique tags found accross all user selected image file names.
         material_channel_occurance = {}
@@ -286,6 +287,13 @@ class RYMAT_OT_import_texture_set(Operator, ImportHelper):
                     if value_node.bl_static_type != 'TEX_IMAGE':
                         material_layers.replace_material_channel_node(channel, 'TEXTURE')
 
+                    # Determine the default texture interpolation based on the material channel name.
+                    default_texture_interpolation = 'Linear'
+                    channel_socket_name = shaders.get_shader_channel_socket_name(channel)
+                    shader_material_channel = shader_info.material_channels.get(channel_socket_name)
+                    if shader_material_channel:
+                        default_texture_interpolation = shader_material_channel.default_texture_interpolation
+
                     # Place the image into a material nodes based on texture projection and inferred material channel name.
                     projection_node = material_layers.get_material_layer_node('PROJECTION', selected_layer_index)
                     match projection_node.node_tree.name:
@@ -293,12 +301,14 @@ class RYMAT_OT_import_texture_set(Operator, ImportHelper):
                             value_node = material_layers.get_material_layer_node('VALUE', selected_layer_index, channel)
                             if value_node.bl_static_type == 'TEX_IMAGE':
                                 value_node.image = imported_image
+                                value_node.interpolation = default_texture_interpolation
 
                         case 'RY_TriplanarProjection':
                             for i in range(0, 3):
                                 value_node = material_layers.get_material_layer_node('VALUE', selected_layer_index, channel, node_number=i + 1)
                                 if value_node.bl_static_type == 'TEX_IMAGE':
                                     value_node.image = imported_image
+                                    value_node.interpolation = default_texture_interpolation
 
                 # If the image is detected to be using channel packing, adjust the output of the material channel.
                 if detected_material_channel == 'CHANNEL_PACKED':

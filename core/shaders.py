@@ -89,6 +89,13 @@ IMAGE_COLORSPACES = [
     ('sRGB', "sRGB", "sRGB")
 ]
 
+TEXTURE_INTERPOLATION = [
+    ('Linear', "Linear", "Linear"),
+    ('Cubic', "Cubic", "Cubic"),
+    ('Closest', "Closest", "Closest"),
+    ('Smart', "Smart", "Smart")
+]
+
 # Internal backup template for the shader json file.
 DEFAULT_SHADER_JSON = {
     "shaders": [
@@ -174,6 +181,7 @@ def set_shader(shader_name):
                 channel.socket_subtype = shader_material_channel['socket_subtype']
                 channel.default_blend_mode = shader_material_channel['default_blend_mode']
                 channel.default_colorspace = shader_material_channel['default_colorspace']
+                channel.default_texture_interpolation = shader_material_channel['default_texture_interpolation']
 
                 match channel.socket_type:
                     case 'NodeSocketFloat':
@@ -358,6 +366,7 @@ def apply_default_shader(self):
     channel.socket_float_max = 1
     channel.default_blend_mode = "MIX"
     channel.default_colorspace = 'Linear Rec.709'
+    channel.default_texture_interpolation = 'Linear'
 
     channel = shader_info.material_channels.add()
     channel.name = "Metallic"
@@ -369,6 +378,7 @@ def apply_default_shader(self):
     channel.socket_float_max = 1
     channel.default_blend_mode = "MIX"
     channel.default_colorspace = 'Non-Color'
+    channel.default_texture_interpolation = 'Linear'
 
     channel = shader_info.material_channels.add()
     channel.name = "Roughness"
@@ -380,6 +390,7 @@ def apply_default_shader(self):
     channel.socket_float_max = 1
     channel.default_blend_mode = "MIX"
     channel.default_colorspace = 'Non-Color'
+    channel.default_texture_interpolation = 'Linear'
 
     channel = shader_info.material_channels.add()
     channel.name = "Alpha"
@@ -391,6 +402,7 @@ def apply_default_shader(self):
     channel.socket_float_max = 1
     channel.default_blend_mode = "MIX"
     channel.default_colorspace = 'Non-Color'
+    channel.default_texture_interpolation = 'Linear'
 
     channel = shader_info.material_channels.add()
     channel.name = "Normal"
@@ -401,6 +413,7 @@ def apply_default_shader(self):
     channel.socket_float_max = 1
     channel.default_blend_mode = "NORMAL_MAP_COMBINE"
     channel.default_colorspace = 'Non-Color'
+    channel.default_texture_interpolation = 'Linear'
 
     channel = shader_info.material_channels.add()
     channel.name = "Height"
@@ -412,6 +425,7 @@ def apply_default_shader(self):
     channel.socket_float_max = 1.0
     channel.default_blend_mode = "ADD"
     channel.default_colorspace = 'Non-Color'
+    channel.default_texture_interpolation = 'Cubic'
 
     channel = shader_info.material_channels.add()
     channel.name = "Emission"
@@ -422,6 +436,7 @@ def apply_default_shader(self):
     channel.socket_float_max = 1.0
     channel.default_blend_mode = "MIX"
     channel.default_colorspace = 'Linear Rec.709'
+    channel.default_texture_interpolation = 'Linear'
 
     # Set the default selected material channel to be the first defined channel.
     if len(shader_info.material_channels) > 0:
@@ -502,6 +517,12 @@ class RYMAT_shader_material_channel(PropertyGroup):
         name="Default Image Colorspace",
         description="The colorspace images will be assigned when they are imported into the material channel",
         default='Linear Rec.709'
+    )
+    default_texture_interpolation: EnumProperty(
+        items=TEXTURE_INTERPOLATION,
+        name="Default Texture Interpolation",
+        description="The default texture interpolation applied to images imported into this material channel",
+        default="Linear"
     )
 
 class RYMAT_shader_unlayered_property(PropertyGroup):
@@ -601,6 +622,7 @@ class RYMAT_OT_save_shader(Operator):
 
             new_channel['default_blend_mode'] = channel.default_blend_mode
             new_channel['default_colorspace'] = channel.default_colorspace
+            new_channel['default_texture_interpolation'] = channel.default_texture_interpolation
             new_shader_info['material_channels'].append(new_channel)
         
         # If the shader already existed, overwrite the existing shader settings in the json file.

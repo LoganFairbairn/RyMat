@@ -18,7 +18,7 @@ def get_random_image_id():
     return str(random.randrange(10000,99999))
 
 def set_default_image_colorspace(image, material_channel_name):
-    '''Correctly sets an image's colorspace based on the provided material channel for use within Blender.'''
+    '''Sets an image's default colorspace based on the shader settings for the specified material channel.'''
     shader_info = bpy.context.scene.rymat_shader_info
     channel_socket_name = shaders.get_shader_channel_socket_name(material_channel_name)
     material_channel = shader_info.material_channels.get(channel_socket_name)
@@ -197,6 +197,7 @@ class RYMAT_OT_import_texture_node_image(Operator, ImportHelper):
         head_tail = os.path.split(self.filepath)
         image_name = head_tail[1]
 
+        # TODO: This might cause an error!
         # Delete images with the same name if they exist.
         image = bpy.data.images.get(image_name)
         if image:
@@ -206,10 +207,15 @@ class RYMAT_OT_import_texture_node_image(Operator, ImportHelper):
         bpy.ops.image.open(filepath=self.filepath)
         image = bpy.data.images[image_name]
         texture_node.image = image
-                
+        
         # If a material channel is defined, set the color space.
         if self.material_channel_name != "":
             set_default_image_colorspace(image, self.material_channel_name)
+            shader_info = bpy.context.scene.rymat_shader_info
+            channel_socket_name = shaders.get_shader_channel_socket_name(self.material_channel_name)
+            material_channel = shader_info.material_channels.get(channel_socket_name)
+            if material_channel:
+                texture_node.interpolation = material_channel.default_texture_interpolation
 
         # Print a warning about using DirectX normal maps for users if it's detected they are using one.
         if check_for_directx(image_name) and self.material_channel_name == 'NORMAL':
