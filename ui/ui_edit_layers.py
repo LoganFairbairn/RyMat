@@ -127,14 +127,10 @@ def draw_edit_layers_ui(self, context):
         column.prop_enum(context.scene.rymat_panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="Open Shader Settings")
         return
 
-    # Print info for when there is no active material.
-    active_material = active_object.active_material
-    if active_material == None:
-        bau.print_aligned_text(layout, "No Active Material", alignment='CENTER')
-        return
 
     # Print info for when the active material isn't made with this add-on.
-    elif bau.verify_addon_material(active_material) == False:
+    active_material = active_object.active_material
+    if bau.verify_addon_material(active_material) == False:
         bau.print_aligned_text(layout, "Material Invalid", alignment='CENTER')
         bau.print_aligned_text(layout, "Materials must be created with this add-on.", alignment='CENTER')
         bau.print_aligned_text(layout, "Node format must remain unchanged.", alignment='CENTER')
