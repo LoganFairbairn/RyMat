@@ -1862,7 +1862,7 @@ def set_material_channel_crgba_output(material_channel_name, crgba_output, layer
         # If this material channel contains normal data, and is using UV projection,
         # connect to a node to fix normal rotations.
         projection_node = get_material_layer_node('PROJECTION', layer_index, material_channel_name)
-        if projection_node.node_tree.name == 'RY_UVProjection':
+        if projection_node.node_tree.name == 'RY_UVProjection' and material_channel_name == 'NORMAL':
             fix_normal_rotation_node = get_material_layer_node('FIX_NORMAL_ROTATION', layer_index, material_channel_name)
             bau.safe_node_link(channel_output_node.outputs[0], fix_normal_rotation_node.inputs[0], layer_node_tree)
             bau.safe_node_link(projection_node.outputs.get('Rotation'), fix_normal_rotation_node.inputs.get('Rotation'), layer_node_tree)
