@@ -361,7 +361,7 @@ def apply_default_shader(self):
     channel.name = "Base Color"
     channel.default_active = True
     channel.socket_type = "NodeSocketColor"
-    channel.socket_color_default = [0, 0.3, 1]
+    channel.socket_color_default = [0.5, 0.5, 0.5]
     channel.socket_float_min = 0
     channel.socket_float_max = 1
     channel.default_blend_mode = "MIX"
