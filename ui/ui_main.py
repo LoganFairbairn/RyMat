@@ -1,7 +1,6 @@
 # Draws the rymat user interface.
 
 import bpy
-from bpy.types import Menu
 from . import ui_edit_layers
 from . import ui_mesh_map
 from . import ui_settings
