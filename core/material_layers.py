@@ -562,7 +562,7 @@ def add_material_channel_nodes(material_channel_name, node_tree, layer_type, sel
         normal_rotation_fix_node.location[0] = -600
         normal_rotation_fix_node.location[1] = -500
         normal_rotation_fix_node.parent = channel_frame_node
-        normal_rotation_fix_node.width = 300
+        normal_rotation_fix_node.width = 200
         normal_rotation_fix_node.node_tree = bau.append_group_node('RY_FixNormalRotation')
 
         mix_node = node_tree.nodes.new('ShaderNodeGroup')
@@ -1393,7 +1393,7 @@ def apply_mesh_maps():
     debug_logging.log("Applied baked mesh maps.")
 
 def relink_material_channel(relink_material_channel_name="", original_output_channel='', unlink_projection=False):
-    '''Relinks projection nodes to material channels based on the current projection node tree being used.'''
+    '''Relinks the material channel nodes based on the current projection node tree being used.'''
     selected_layer_index = bpy.context.scene.rymat_layer_stack.selected_layer_index
     layer_node_tree = get_layer_node_tree(selected_layer_index)
     projection_node = get_material_layer_node('PROJECTION', selected_layer_index)
@@ -1522,41 +1522,25 @@ def relink_material_channel(relink_material_channel_name="", original_output_cha
                         # Link triplanar blending node.
                         layer_node_tree.links.new(projection_node.outputs.get('AxisMask'), triplanar_blend_node.inputs.get('AxisMask'))
 
-                case _:
+                case 'RY_UVProjection':
                     value_node = get_material_layer_node('VALUE', selected_layer_index, channel.name)
-                    mix_image_alpha_node = get_material_layer_node('MIX_IMAGE_ALPHA', selected_layer_index, channel.name)
-                    
-                    match value_node.bl_static_type:
-                        case 'TEX_IMAGE':
-                            if value_node.bl_static_type == 'TEX_IMAGE':
-                                layer_node_tree.links.new(projection_output_node.outputs[0], value_node.inputs[0])
-                                layer_node_tree.links.new(value_node.outputs.get('Alpha'), mix_image_alpha_node.inputs[1])
-
-                        case 'GROUP':
-                            if value_node.bl_static_type == 'GROUP':
-                                if not value_node.node_tree.name.startswith("RY_Default"):
-                                    layer_node_tree.links.new(projection_node.outputs[0], value_node.inputs[0])
+                    if value_node.bl_static_type == 'TEX_IMAGE':
+                        layer_node_tree.links.new(projection_output_node.outputs[0], value_node.inputs[0])
 
             set_material_channel_crgba_output(channel.name, original_output_channel, selected_layer_index)
 
-def delete_value_nodes(material_channel_name, selected_layer_index, layer_node_tree):
-    '''Deletes nodes used for triplanar texture sampling and blending for the specified material channel.'''
+def delete_material_channel_texture_nodes(material_channel_name, selected_layer_index, layer_node_tree):
+    '''Deletes all texture nodes used in the specified material channel.'''
+    # The max texture sample nodes that can exist for a projection method is 9, for triplanar hex grid projection.
+    # Remove all value / texture sample nodes.
     selected_layer_index = bpy.context.scene.rymat_layer_stack.selected_layer_index
     layer_node_tree = get_layer_node_tree(selected_layer_index)
-
-    # The max texture sample nodes that can exist is 9, for triplanar hex grid projection.
-    # Remove all value / texture sample nodes.
     for i in range(0, 9):
         texture_sample_node = get_material_layer_node('VALUE', selected_layer_index, material_channel_name, i + 1)
         if texture_sample_node:
             layer_node_tree.nodes.remove(texture_sample_node)
 
-    # Delete triplanar blend node if one exists.
-    triplanar_blend_node = get_material_layer_node('TRIPLANAR_BLEND', selected_layer_index, material_channel_name)
-    if triplanar_blend_node:
-        layer_node_tree.nodes.remove(triplanar_blend_node)
-
-def set_matchannel_projection(material_channel_name, projection_method, set_texture_node=False):
+def set_material_channel_projection(material_channel_name, projection_method, set_texture_node=False):
     '''Changes the projection nodes for the specified material channel to match the specified projection method.'''
     selected_layer_index = bpy.context.scene.rymat_layer_stack.selected_layer_index
     layer_node_tree = get_layer_node_tree(selected_layer_index)
@@ -1577,7 +1561,8 @@ def set_matchannel_projection(material_channel_name, projection_method, set_text
     # Texture nodes are the only nodes that require a specific projection node setup, ignore other node types.
     # If set_texture_node is true, the material channel value node will be replaced with a texture node, regardless of it's original node type.
     if value_node.bl_static_type == 'TEX_IMAGE' or set_texture_node:
-        # Remember settings from the original texture sample nodes.
+
+        # Remember settings from the original texture nodes.
         value_node.parent = None
         original_node_location = value_node.location.copy()
         original_image = None
@@ -1586,8 +1571,8 @@ def set_matchannel_projection(material_channel_name, projection_method, set_text
             original_image = value_node.image
             original_interpolation = value_node.interpolation
 
-        # Delete original value nodes.
-        delete_value_nodes(material_channel_name, selected_layer_index, layer_node_tree)
+        # Remove the old projection nodes.
+        delete_material_channel_texture_nodes(material_channel_name, selected_layer_index, layer_node_tree)
 
         # Add new texture nodes based on the projection method.
         location_x = original_node_location[0]
@@ -1612,12 +1597,41 @@ def set_matchannel_projection(material_channel_name, projection_method, set_text
         # Add texture sample blending modes if required.
         triplanar_blend_node = None
         match projection_method:
+            case 'UV':
+                # Delete triplanar blend node if one exists.
+                triplanar_blend_node = get_material_layer_node('TRIPLANAR_BLEND', selected_layer_index, material_channel_name)
+                if triplanar_blend_node:
+                    layer_node_tree.nodes.remove(triplanar_blend_node)
+
+                # Add a normal rotation fix node for material channels with normal data.
+                if static_channel_name == 'NORMAL':
+                    fix_normal_rotation_node = layer_node_tree.nodes.new('ShaderNodeGroup')
+                    fix_normal_rotation_node.node_tree = bau.append_group_node("RY_FixNormalRotation")
+                    fix_normal_rotation_node.name = 'FIX_NORMAL_ROTATION'
+                    fix_normal_rotation_node.width = 200
+                    fix_normal_rotation_node.hide = True
+                    fix_normal_rotation_node.label = fix_normal_rotation_node.name
+                    fix_normal_rotation_node.parent = frame
+                    fix_normal_rotation_node.location = (-600, -500)
+
             case 'TRIPLANAR':
                 triplanar_blend_node = layer_node_tree.nodes.new('ShaderNodeGroup')
                 if static_channel_name == 'NORMAL':
                     triplanar_blend_node.node_tree = bau.append_group_node("RY_TriplanarNormalsBlend")
                 else:
                     triplanar_blend_node.node_tree = bau.append_group_node("RY_TriplanarBlend")
+
+                # Delete normal rotation fix node if one exists.
+                fix_normal_rotation_node = get_material_layer_node('FIX_NORMAL_ROTATION', selected_layer_index, material_channel_name)
+                if fix_normal_rotation_node:
+                    layer_node_tree.nodes.remove(fix_normal_rotation_node)
+
+                triplanar_blend_node.name = format_material_channel_node_name(static_channel_name, 'TRIPLANAR_BLEND')
+                triplanar_blend_node.label = triplanar_blend_node.name
+                triplanar_blend_node.width = 300
+                triplanar_blend_node.hide = True
+                triplanar_blend_node.location = (location_x, location_y)
+                triplanar_blend_node.parent = frame
 
             case 'TRIPLANAR_HEX_GRID':
                 triplanar_blend_node = layer_node_tree.nodes.new('ShaderNodeGroup')
@@ -1626,13 +1640,12 @@ def set_matchannel_projection(material_channel_name, projection_method, set_text
                 else:
                     triplanar_blend_node.node_tree = bau.append_group_node("RY_TriplanarHexGridBlend")
 
-        if triplanar_blend_node:
-            triplanar_blend_node.name = format_material_channel_node_name(static_channel_name, 'TRIPLANAR_BLEND')
-            triplanar_blend_node.label = triplanar_blend_node.name
-            triplanar_blend_node.width = 300
-            triplanar_blend_node.hide = True
-            triplanar_blend_node.location = (location_x, location_y)
-            triplanar_blend_node.parent = frame
+                triplanar_blend_node.name = format_material_channel_node_name(static_channel_name, 'TRIPLANAR_BLEND')
+                triplanar_blend_node.label = triplanar_blend_node.name
+                triplanar_blend_node.width = 300
+                triplanar_blend_node.hide = True
+                triplanar_blend_node.location = (location_x, location_y)
+                triplanar_blend_node.parent = frame
         
         # Connect texture sample and blending nodes for material channels.
         relink_material_channel(material_channel_name)
@@ -1650,8 +1663,8 @@ def replace_material_channel_node(material_channel_name, node_type):
             value_node.parent = None
             original_node_location = value_node.location.copy()
 
-            # Remove the old nodes.
-            delete_value_nodes(static_matchannel_name, selected_layer_index, layer_node_tree)
+            # Remove the old texture nodes.
+            delete_material_channel_texture_nodes(static_matchannel_name, selected_layer_index, layer_node_tree)
 
             # Replace the material channel value nodes with a new value or color node
             # based on the shader socket type.
@@ -1689,16 +1702,16 @@ def replace_material_channel_node(material_channel_name, node_type):
         case 'TEXTURE':
             match projection_node.node_tree.name:
                 case 'RY_UVProjection':
-                    set_matchannel_projection(static_matchannel_name, 'UV', set_texture_node=True)
+                    set_material_channel_projection(static_matchannel_name, 'UV', set_texture_node=True)
 
                 case 'RY_TriplanarProjection':
-                    set_matchannel_projection(static_matchannel_name, 'TRIPLANAR', set_texture_node=True)
+                    set_material_channel_projection(static_matchannel_name, 'TRIPLANAR', set_texture_node=True)
 
                 case 'RY_TriplanarHexGridProjection':
-                    set_matchannel_projection(static_matchannel_name, 'TRIPLANAR_HEX_GRID', set_texture_node=True)
+                    set_material_channel_projection(static_matchannel_name, 'TRIPLANAR_HEX_GRID', set_texture_node=True)
 
                 case 'RY_DecalProjection':
-                    set_matchannel_projection(static_matchannel_name, 'DECAL', set_texture_node=True)
+                    set_material_channel_projection(static_matchannel_name, 'DECAL', set_texture_node=True)
 
 def set_layer_projection(projection_mode, self):
     '''Changes the projection nodes for the selected layer.'''
@@ -1713,7 +1726,7 @@ def set_layer_projection(projection_mode, self):
         debug_logging.log("Missing layer projection node.", message_type='ERROR')
         return
 
-    # Note that users can't change projection for decal layers, so it's not handled here.
+    # Note that users can't change to decal projection, so it's not handled here.
     # Change projection nodes for the material channel.
     update_nodes = False
     match projection_mode:
@@ -1739,7 +1752,7 @@ def set_layer_projection(projection_mode, self):
         for channel in shader_info.material_channels:
             channel_nodes_exist = check_channel_nodes_exist(channel.name, layer_node.node_tree)
             if channel_nodes_exist:
-                set_matchannel_projection(channel.name, projection_mode)
+                set_material_channel_projection(channel.name, projection_mode)
 
     # Log the operation for debugging purposes.
     debug_logging.log("Changed layer projection to: {0}".format(projection_mode))
@@ -1795,14 +1808,7 @@ def get_material_channel_output_node(material_channel_name, layer_index):
         else:
             channel_output_node = value_node
     else:
-        if material_channel_name == 'NORMAL':
-            fix_normal_rotation_node = get_material_layer_node('FIX_NORMAL_ROTATION', layer_index, material_channel_name)
-            if fix_normal_rotation_node:
-                channel_output_node = fix_normal_rotation_node
-            else:
-                debug_logging.log("Fix normal rotation node missing.", message_type='ERROR')
-        else:
-            channel_output_node = get_material_layer_node('VALUE', layer_index, material_channel_name)
+        channel_output_node = get_material_layer_node('VALUE', layer_index, material_channel_name)
     return channel_output_node
 
 def set_material_channel_crgba_output(material_channel_name, crgba_output, layer_index):
@@ -1841,22 +1847,33 @@ def set_material_channel_crgba_output(material_channel_name, crgba_output, layer
     bau.unlink_node(channel_output_node, layer_node_tree, unlink_inputs=False, unlink_outputs=True)
     bau.unlink_node(separate_rgb_node, layer_node_tree, unlink_inputs=True, unlink_outputs=True)
 
-    # If the channel is using an image texture node, always link it's alpha to the mix image alpha node.
+    # If the material channel is using an image texture node...
     output_node_index = 0
-    mix_image_alpha_node = get_material_layer_node('MIX_IMAGE_ALPHA', layer_index, material_channel_name)
     if value_node.bl_static_type == 'TEX_IMAGE':
+
+        # Always link image alpha so it's able to blend into the material channel opacity.
+        mix_image_alpha_node = get_material_layer_node('MIX_IMAGE_ALPHA', layer_index, material_channel_name)
         bau.safe_node_link(channel_output_node.outputs[1], mix_image_alpha_node.inputs[1], layer_node_tree)
 
         # If the desired output channel is alpha, adjust the output index.
         if crgba_output == 'ALPHA':
             output_node_index = 1
-    
-    # Link the output / separate node to the material channel mix node, or filter nodes.
+
+        # If this material channel contains normal data, and is using UV projection,
+        # connect to a node to fix normal rotations.
+        projection_node = get_material_layer_node('PROJECTION', layer_index, material_channel_name)
+        if projection_node.node_tree.name == 'RY_UVProjection':
+            fix_normal_rotation_node = get_material_layer_node('FIX_NORMAL_ROTATION', layer_index, material_channel_name)
+            bau.safe_node_link(channel_output_node.outputs[0], fix_normal_rotation_node.inputs[0], layer_node_tree)
+            bau.safe_node_link(projection_node.outputs.get('Rotation'), fix_normal_rotation_node.inputs.get('Rotation'), layer_node_tree)
+            channel_output_node = fix_normal_rotation_node
+
+    # Link the separate node to the material channel mix node, or filter nodes.
     if use_separate_rgb_node:
         rgb_output_index = SEPARATE_RGB_NODE_OUTPUT_INDEX[crgba_output]
         mix_node_input = MIX_NODE_INPUT_INDEX[mix_node.bl_static_type]
-        bau.safe_node_link(separate_rgb_node.outputs[rgb_output_index], mix_node.inputs[mix_node_input], layer_node_tree)
         bau.safe_node_link(channel_output_node.outputs[0], separate_rgb_node.inputs[0], layer_node_tree)
+        bau.safe_node_link(separate_rgb_node.outputs[rgb_output_index], mix_node.inputs[mix_node_input], layer_node_tree)
 
     # If the separate RGB node is not required, connect the output node to the mix node,
     # or to the last filter node.
