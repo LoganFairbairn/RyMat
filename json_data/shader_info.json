@@ -1,7 +1,7 @@
 {
     "shaders": [
         {
-            "group_node_name": "MetallicRoughnessPBR",
+            "group_node_name": "CustomPrincipledBSDF",
             "material_channels": [
                 {
                     "name": "Base Color",

@@ -335,7 +335,7 @@ def apply_default_shader(self):
     shader_info = bpy.context.scene.rymat_shader_info
 
     # Ensure the default shader group node is in the blend file.
-    shader_nodegroup_name = "MetallicRoughnessPBR"
+    shader_nodegroup_name = "CustomPrincipledBSDF"
     shader_node_group = bpy.data.node_groups.get(shader_nodegroup_name)
     if shader_node_group:
         shader_info.shader_node_group = shader_node_group
@@ -350,7 +350,7 @@ def apply_default_shader(self):
             debug_logging.log("Shader nodetree does not exist and cannot be appended from the add-on assets file.")
             return
 
-    shader_info.group_node_name = "MetallicRoughnessPBR"
+    shader_info.group_node_name = "CustomPrincipledBSDF"
 
     # Reset the selected shader channel index.
     bpy.context.scene.rymat_shader_channel_index = 0
