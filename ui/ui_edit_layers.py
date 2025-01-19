@@ -536,9 +536,6 @@ def get_main_panel_context():
     '''Returns true if the context is correct to draw the main panels.'''
     if bpy.context.scene.rymat_panel_properties.sections != 'SECTION_EDIT_MATERIALS':
         return False
-    
-    if bpy.context.scene.rymat_shader_info.shader_node_group == None:
-        return False
 
     active_object = bpy.context.view_layer.objects.active
     if active_object == None:
@@ -632,7 +629,7 @@ class ColorPalettePanel(Panel):
     # Only draw this panel when the edit materials section is selected.
     @ classmethod
     def poll(cls, context):
-        return get_main_panel_context()
+        return get_main_panel_context() and bpy.context.scene.rymat_shader_info.shader_node_group
 
     def draw(self, context):
         layout = self.layout
@@ -655,7 +652,7 @@ class MaterialPropertiesPanel(Panel):
     # Only draw this panel when the edit materials section is selected.
     @ classmethod
     def poll(cls, context):
-        return get_main_panel_context()
+        return get_main_panel_context() and bpy.context.scene.rymat_shader_info.shader_node_group
 
     def draw(self, context):
         layout = self.layout
