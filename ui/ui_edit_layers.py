@@ -342,26 +342,27 @@ def draw_layer_projection(layout):
     first_column = split.column()
     second_column = split.column()
 
-    # Draw the projection mode submenu.
-    row = first_column.row()
-    row.label(text="Method")
-    row = second_column.row()
-    projection_method_dropdown_label = GROUP_NODE_UI_LABELS[projection_node.node_tree.name]
-    row.menu('RYMAT_MT_layer_projection_submenu', text=projection_method_dropdown_label)
+    # There are no settings for decal projection, draw a label instead.
+    if projection_node.node_tree.name == 'RY_DecalProjection':
+        row = layout.row()
+        row.alignment = 'CENTER'
+        row.label(text="USING DECAL PROJECTION")
 
-    # Draw adjustment settings for the selected projection method.
-    match projection_node.node_tree.name:
-        case 'RY_DecalProjection':
-            row = layout.row()
-            row.alignment = 'CENTER'
-            row.label(text="USING DECAL PROJECTION")
-        
-        case _:
-            for input in projection_node.inputs:
-                row = first_column.row()
-                row.label(text=input.name)
-                row = second_column.row()
-                row.prop(input, "default_value", text="", slider=True)
+    # For all other layer projection methods, draw settings for layer projection.
+    else:
+        # Draw the projection mode submenu.
+        row = first_column.row()
+        row.label(text="Method")
+        row = second_column.row()
+        projection_method_dropdown_label = GROUP_NODE_UI_LABELS[projection_node.node_tree.name]
+        row.menu('RYMAT_MT_layer_projection_submenu', text=projection_method_dropdown_label)
+
+        # Draw projection settings.
+        for input in projection_node.inputs:
+            row = first_column.row()
+            row.label(text=input.name)
+            row = second_column.row()
+            row.prop(input, "default_value", text="", slider=True)
 
 def draw_unlayered_shader_properties(layout):
     '''Draws unlayered properties of the shader node.'''
