@@ -539,7 +539,11 @@ def get_main_panel_context():
     if bpy.context.scene.rymat_shader_info.shader_node_group == None:
         return False
 
-    if bpy.context.view_layer.objects.active.type != 'MESH':
+    active_object = bpy.context.view_layer.objects.active
+    if active_object == None:
+        return False
+
+    if active_object.type != 'MESH':
         return False
     
     return True
@@ -559,8 +563,6 @@ class MaterialSelectorPanel(Panel):
     def draw(self, context):        
         layout = self.layout
         active_object = bpy.context.active_object
-        if not active_object:
-            return
         
         # Use a two column layout.
         split = layout.split(factor=0.925)
