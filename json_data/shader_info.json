@@ -56,6 +56,18 @@
                     "default_texture_interpolation": "Linear"
                 },
                 {
+                    "name": "Height",
+                    "default_active": false,
+                    "socket_type": "NodeSocketFloat",
+                    "socket_subtype": "FACTOR",
+                    "socket_default": 0.5,
+                    "socket_min": -1,
+                    "socket_max": 1,
+                    "default_blend_mode": "ADD",
+                    "default_colorspace": "Non-Color",
+                    "default_texture_interpolation": "Cubic"
+                },
+                {
                     "name": "Normal",
                     "default_active": false,
                     "socket_type": "NodeSocketColor",
@@ -72,16 +84,32 @@
                     "default_texture_interpolation": "Linear"
                 },
                 {
-                    "name": "Height",
+                    "name": "Ambient Occlusion",
+                    "default_active": false,
+                    "socket_type": "NodeSocketColor",
+                    "socket_subtype": "NONE",
+                    "socket_default": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "socket_min": 0,
+                    "socket_max": 1,
+                    "default_blend_mode": "MIX",
+                    "default_colorspace": "Non-Color",
+                    "default_texture_interpolation": "Linear"
+                },
+                {
+                    "name": "Subsurface Weight",
                     "default_active": false,
                     "socket_type": "NodeSocketFloat",
                     "socket_subtype": "FACTOR",
-                    "socket_default": 0.5,
-                    "socket_min": -1,
+                    "socket_default": 0,
+                    "socket_min": 0,
                     "socket_max": 1,
-                    "default_blend_mode": "ADD",
+                    "default_blend_mode": "MIX",
                     "default_colorspace": "Non-Color",
-                    "default_texture_interpolation": "Cubic"
+                    "default_texture_interpolation": "Linear"
                 },
                 {
                     "name": "Emission",
@@ -97,22 +125,6 @@
                     "socket_max": 1,
                     "default_blend_mode": "MIX",
                     "default_colorspace": "Linear Rec.709",
-                    "default_texture_interpolation": "Linear"
-                },
-                {
-                    "name": "Ambient Occlusion",
-                    "default_active": false,
-                    "socket_type": "NodeSocketColor",
-                    "socket_subtype": "NONE",
-                    "socket_default": [
-                        1,
-                        1,
-                        1
-                    ],
-                    "socket_min": 0,
-                    "socket_max": 1,
-                    "default_blend_mode": "MIX",
-                    "default_colorspace": "Non-Color",
                     "default_texture_interpolation": "Linear"
                 }
             ]
