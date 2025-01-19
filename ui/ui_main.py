@@ -68,7 +68,7 @@ class RyMatMainPanel(bpy.types.Panel):
         row.prop_enum(panel_properties, "sections", 'SECTION_TEXTURE_SETTINGS', text="", icon='IMAGE_DATA')
         row.prop_enum(panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="", icon='MATSHADERBALL')
         row.prop_enum(panel_properties, "sections", 'SECTION_OUTLINES', text="", icon='MATSPHERE')
-        row.prop_enum(panel_properties, "sections", 'SECTION_VIEWPORT_SETTINGS', text="", icon='VIEW3D')
+        row.prop_enum(panel_properties, "sections", 'SECTION_VIEWPORT_SETTINGS', text="", icon='RESTRICT_VIEW_OFF')
         row.prop_enum(panel_properties, "sections", 'SECTION_EXPORT_TEXTURES', text="", icon='EXPORT')
         
         # Draw operators for saving and managing assets.
