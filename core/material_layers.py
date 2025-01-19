@@ -894,7 +894,6 @@ def add_material_layer(layer_type, self):
                     if texture_node.bl_static_type == 'TEX_IMAGE':
                         texture_node.image = default_decal_image
                         bau.set_texture_paint_image(default_decal_image)
-                        bau.save_image(default_decal_image)
 
             # Add an image mask to apply a default transparency effect to the decal layer.
             layer_masks.add_layer_mask('DECAL', self)
