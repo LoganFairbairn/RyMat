@@ -28,7 +28,7 @@ class RYMAT_panel_properties(bpy.types.PropertyGroup):
                ('SECTION_TEXTURE_SETTINGS', "Texture Settings", "Settings that defined how materials and textures are created by this add-on."),
                ('SECTION_SHADER_SETTINGS', "Shader Settings", "Settings for shader node setups."),
                ('SECTION_VIEWPORT_SETTINGS', "Viewport Settings", "This section contains select viewport render settings to help preview materials"),
-               ('SECTION_APPEND', "Append", "This section operators to append useful assets to your blend file"),
+               ('SECTION_ASSETS', "Add-on Asset Manager", "This section operators to manage and append assets from this add-on"),
                ('SECTION_OUTLINES', "Outlines", "This section operators to apply and edit outline effects for toon shaders")
         ],
         name="RyMat Sections",
@@ -76,7 +76,7 @@ class RyMatMainPanel(bpy.types.Panel):
         row.scale_x = 10
         row.scale_y = 1.5
         row.operator("rymat.save_all_textures", text="", icon='FILE_TICK')
-        row.prop_enum(panel_properties, "sections", 'SECTION_APPEND', text="", icon='APPEND_BLEND')
+        row.prop_enum(panel_properties, "sections", 'SECTION_ASSETS', text="", icon='ASSET_MANAGER')
 
         # Draw a link to documentation for this add-on.
         row = second_column.row()
@@ -104,7 +104,7 @@ class RyMatMainPanel(bpy.types.Panel):
             case 'SECTION_VIEWPORT_SETTINGS':
                 ui_viewport.draw_viewport_setting_ui(self, context)
 
-            case 'SECTION_APPEND':
+            case 'SECTION_ASSETS':
                 layout.operator("rymat.append_default_workspace", text="Append Default Workspace", icon='NONE')
                 layout.operator("rymat.append_material_ball", text="Append Material Ball", icon='NONE')
 
