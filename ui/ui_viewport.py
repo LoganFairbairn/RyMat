@@ -45,11 +45,6 @@ def draw_viewport_setting_ui(self, context):
                 row.prop(hdri_node.inputs.get('Environment Rotation'), "default_value", text="", index=2, slider=True)
 
                 row = first_column.row()
-                row.label(text="Environment Blur")
-                row = second_column.row()
-                row.prop(hdri_node.inputs.get('Environment Blur'), "default_value", text="", slider=True)
-
-                row = first_column.row()
                 row.label(text="Environment Exposure")
                 row = second_column.row()
                 row.prop(hdri_node.inputs.get('Environment Exposure'), "default_value", text="", slider=True)
@@ -57,5 +52,4 @@ def draw_viewport_setting_ui(self, context):
     # Draw an operator to append the HDRI lighting setup.
     else:
         row = layout.row()
-        row.scale_y = 1.5
         row.operator("rymat.append_hdri_world", text="Append HDRI World")
