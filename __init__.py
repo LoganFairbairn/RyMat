@@ -27,7 +27,7 @@ from .preferences import AddonPreferences
 from .core.texture_set_settings import RYMAT_texture_set_settings, RYMAT_OT_set_raw_texture_folder, RYMAT_OT_open_raw_texture_folder
 
 # Shaders
-from .core.shaders import RYMAT_shader_name, RYMAT_shader_material_channel, RYMAT_shader_unlayered_property, RYMAT_shader_info, RYMAT_OT_set_shader, RYMAT_OT_new_shader, RYMAT_OT_save_shader, RYMAT_OT_delete_shader, RYMAT_OT_add_shader_channel, RYMAT_OT_delete_shader_channel, RYMAT_OT_create_shader_from_nodetree, RYMAT_OT_apply_default_shader, update_shader_list
+from .core.shaders import RYMAT_shader_name, RYMAT_shader_material_channel, RYMAT_shader_unlayered_property, RYMAT_shader_info, RYMAT_OT_set_shader, RYMAT_OT_new_shader, RYMAT_OT_save_shader, RYMAT_OT_delete_shader, RYMAT_OT_add_shader_channel, RYMAT_OT_delete_shader_channel, RYMAT_OT_create_shader_from_nodetree, update_shader_list, apply_default_shader
 
 # Material Layers
 from .core.material_layers import RYMAT_layer_stack, RYMAT_layers, RYMAT_OT_add_material_layer,RYMAT_OT_add_decal_material_layer, RYMAT_OT_add_image_layer, RYMAT_OT_delete_layer, RYMAT_OT_duplicate_layer, RYMAT_OT_move_material_layer_up, RYMAT_OT_move_material_layer_down,RYMAT_OT_toggle_material_channel_preview, RYMAT_OT_toggle_hide_layer, RYMAT_OT_set_layer_projection,RYMAT_OT_change_material_channel_value_node, RYMAT_OT_isolate_material_channel,RYMAT_OT_show_compiled_material, RYMAT_OT_toggle_image_alpha_blending, RYMAT_OT_set_material_channel, RYMAT_OT_set_matchannel_crgba_output, RYMAT_OT_set_layer_blending_mode, RYMAT_OT_merge_with_layer_below, RYMAT_OT_add_material_channel_nodes, RYMAT_OT_delete_material_channel_nodes, refresh_layer_stack, shader_node_tree_update
@@ -60,6 +60,9 @@ from .ui.ui_main import RYMAT_panel_properties, RyMatMainPanel
 
 # Subscription Update Handler
 from .core.subscription_update_handler import on_active_material_changed, on_active_object_changed, on_active_object_name_changed, on_active_material_index_changed, on_active_material_name_changed
+
+# Debugging
+from .core import debug_logging
 
 bl_info = {
     "name": "RyMat",
@@ -119,7 +122,6 @@ classes = (
     RYMAT_OT_add_shader_channel,
     RYMAT_OT_delete_shader_channel,
     RYMAT_OT_create_shader_from_nodetree,
-    RYMAT_OT_apply_default_shader,
 
     # Material Layers
     RYMAT_layer_stack,
@@ -250,11 +252,19 @@ def depsgraph_change_handler(scene, depsgraph):
         if update.id.name == "Shader Nodetree":
             shader_node_tree_update()
 
-def load_handler(dummy):
+@persistent
+def on_file_load(dummy):
+    '''Function for performing tasks when the file is loaded.'''
+
+    # Log when a new file is loaded for debugging purposes.
+    debug_logging.log("File load detected...")
 
     # Add an app handler to run updates for add-on properties when properties on the active object are changed.
     bpy.app.handlers.depsgraph_update_post.clear()
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_change_handler)
+
+    # Add a handler to run right after the depsgraph update.
+    bpy.app.handlers.depsgraph_update_post.append(post_first_depsgraph_update)
 
     # Create objects to manage subscription updating.
     bpy.types.Scene.rymat_object_selection_updater = object()
@@ -294,6 +304,21 @@ def load_handler(dummy):
     
     # Update the shader list when a new blend file is loaded.
     update_shader_list()
+
+@persistent
+def post_first_depsgraph_update(scene):
+    '''Function for performing tasks after the first depsgraph update.'''
+
+    # Perform tasks that should occur after the first depsgraph update.
+    apply_default_shader(scene.rymat_shader_info)
+
+    # Remove this function from app handlers, it's not needed anymore.
+    if post_first_depsgraph_update in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.remove(post_first_depsgraph_update)
+        debug_logging.log("Removed on register function from depsgraph update.", message_type='INFO', sub_process=True)
+
+    # Log the completion of the post depsgraph update function.
+    debug_logging.log("Finished first post depsgraph update.", message_type='INFO', sub_process=True)
 
 def register():
     # Register properties, operators and pannels.
@@ -351,7 +376,10 @@ def register():
     bpy.app.timers.register(auto_save_images, first_interval=addon_preferences.image_auto_save_interval)
 
     # Add a load handler to run functions when a Blender file is loaded.
-    bpy.app.handlers.load_post.append(load_handler)
+    bpy.app.handlers.load_post.append(on_file_load)
+
+    # Add a handler to run right after the depsgraph update.
+    bpy.app.handlers.depsgraph_update_post.append(post_first_depsgraph_update)
 
 def unregister():
     for cls in classes:
@@ -364,8 +392,12 @@ def unregister():
     bpy.types.Scene.active_material_name_sub_owner = None
 
     # Unregister the load handler.
-    if load_handler in bpy.app.handlers.load_post:
-        bpy.app.handlers.load_post.remove(load_handler)
+    if on_file_load in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(on_file_load)
+
+    # If the depsgraph update functions still exists, remove them.
+    if post_first_depsgraph_update in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.remove(post_first_depsgraph_update)
 
     # Unregister image auto saving.
     if bpy.app.timers.is_registered(auto_save_images):

@@ -122,13 +122,10 @@ def draw_edit_layers_ui(self, context):
         bau.print_aligned_text(layout, "No Shader Group Node", alignment='CENTER')
         bau.print_aligned_text(layout, "Define a shader group node to edit layers.", alignment='CENTER')
 
-        # Draw an operator that applies a defaul shader setup.
+        # Draw a button to open shader settings.
         row = layout.row()
         row.alignment = 'CENTER'
         column = row.column()
-        column.operator("rymat.apply_default_shader", text="Apply Default Shader")
-
-        # Draw a button to open shader settings.
         column.prop_enum(context.scene.rymat_panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="Open Shader Settings")
         return
 

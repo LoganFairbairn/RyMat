@@ -326,13 +326,8 @@ def get_socket_subtype_enums(scene=None, context=None):
     # If a shader channel isn't selected, return all possible enum values to avoid an error.
     return items + NODE_SOCKET_FLOAT_SUBTYPES + NODE_SOCKET_VECTOR_SUBTYPES
 
-def apply_default_shader(self):
+def apply_default_shader(shader_info):
     '''Applies default shader settings.'''
-
-    # This function doesn't load from JSON file data because it's a constant backup shader setup
-    # in the case the user JSON data is missing or damaged.
-
-    shader_info = bpy.context.scene.rymat_shader_info
 
     # Ensure the default shader group node is in the blend file.
     shader_nodegroup_name = "CustomPrincipledBSDF"
@@ -441,8 +436,9 @@ def apply_default_shader(self):
     # Set the default selected material channel to be the first defined channel.
     if len(shader_info.material_channels) > 0:
         bpy.context.scene.rymat_layer_stack.selected_material_channel = shader_info.material_channels[0].name
-    
-    debug_logging.log_status("Applied default shader settings.", self, type='INFO')
+
+    # Log this function.
+    debug_logging.log("Applied default shader settings.")
 
 class RYMAT_shader_name(PropertyGroup):
     '''Shader name'''
@@ -757,14 +753,4 @@ class RYMAT_OT_create_shader_from_nodetree(Operator):
         bpy.context.scene.rymat_selected_global_shader_property_index = 0
 
         debug_logging.log_status("Created shader from selected group node.", self, type='INFO')
-        return {'FINISHED'}
-
-class RYMAT_OT_apply_default_shader(Operator):
-    bl_idname = "rymat.apply_default_shader"
-    bl_label = "Apply Default Shader"
-    bl_description = "Applies a default shader group node and shader setup"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        apply_default_shader(self)
         return {'FINISHED'}
