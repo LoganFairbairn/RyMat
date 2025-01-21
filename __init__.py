@@ -250,8 +250,6 @@ def depsgraph_change_handler(scene, depsgraph):
         if update.id.name == "Shader Nodetree":
             shader_node_tree_update()
 
-# Mark load handlers as persistent so they are not called again when loading a new blend file.
-@persistent
 def load_handler(dummy):
 
     # Add an app handler to run updates for add-on properties when properties on the active object are changed.
@@ -364,6 +362,10 @@ def unregister():
     bpy.types.Scene.active_object_name_sub_owner = None
     bpy.types.Scene.active_material_index_sub_owner = None
     bpy.types.Scene.active_material_name_sub_owner = None
+
+    # Unregister the load handler.
+    if load_handler in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(load_handler)
 
     # Unregister image auto saving.
     if bpy.app.timers.is_registered(auto_save_images):
