@@ -6,7 +6,6 @@ from ..core import material_layers
 from ..core import layer_masks
 from ..core import mesh_map_baking
 from ..core import blender_addon_utils
-from ..core import texture_set_settings as tss
 from ..core import shaders
 from ..core import blender_addon_utils as bau
 from ..core import material_filters
