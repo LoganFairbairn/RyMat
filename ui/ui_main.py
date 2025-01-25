@@ -87,7 +87,7 @@ class RyMatMainPanel(bpy.types.Panel):
         # Draw user interface based on the selected section.
         match panel_properties.sections:
             case "SECTION_EDIT_MATERIALS":
-                ui_edit_layers.draw_edit_layers_ui(self, context)
+                ui_edit_layers.draw_edit_layers_ui(self)
 
             case 'SECTION_MESH_MAPS':
                 ui_mesh_map.draw_mesh_map_section_ui(self, context)

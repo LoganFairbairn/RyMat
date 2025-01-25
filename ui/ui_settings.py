@@ -4,6 +4,7 @@ import bpy
 from bpy.types import Menu
 from .. import preferences
 from ..core import blender_addon_utils as bau
+from .ui_edit_layers import draw_material_selector
 
 def draw_texture_setting_ui(layout):
     '''Draws addon texture settings.'''
@@ -76,12 +77,14 @@ def draw_shader_setting_ui(layout):
     '''Draws shader setting user interface for this add-on.'''
 
     # Users should not change shader settings on active materials.
-    active_material = bpy.context.active_object.active_material
-    if active_material:
-        bau.print_aligned_text(layout, "Active Material Selected", alignment='CENTER')
-        bau.print_aligned_text(layout, "You can not edit shader settings", alignment='CENTER')
-        bau.print_aligned_text(layout, "when selecting an active material.", alignment='CENTER')
-        return
+    active_object = bpy.context.view_layer.objects.active
+    if active_object:
+        active_material = bpy.context.view_layer.objects.active.active_material
+        if active_material:
+            draw_material_selector(layout)
+            bau.print_aligned_text(layout, "Active Material Selected", alignment='CENTER', label_icon='WARNING_LARGE')
+            bau.print_aligned_text(layout, "Shader Settings Not Available", alignment='CENTER')
+            return
 
     # Draw options to edit the selected shader preset.
     row = layout.row(align=True)

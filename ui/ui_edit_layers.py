@@ -6,7 +6,6 @@ from ..core import material_layers
 from ..core import layer_masks
 from ..core import mesh_map_baking
 from ..core import blender_addon_utils
-from ..core import shaders
 from ..core import blender_addon_utils as bau
 from ..core import material_filters
 from .. import preferences
@@ -27,6 +26,12 @@ GROUP_NODE_UI_LABELS = {
     "RY_TriplanarProjection": "Triplanar",
     "RY_TriplanarHexGridProjection": "Triplanar Hex Grid",
     "RY_DecalProjection": "Decal Projection"
+}
+
+# List of object types that can use material slots.
+SUPPORTED_OBJECT_TYPES = {
+    "MESH",
+    "CURVE"
 }
 
 def update_material_properties_tab(self, context):
@@ -95,52 +100,169 @@ def draw_image_texture_property(layout, node_tree, texture_node, texture_display
         row = second_column.row()
         row.prop(texture_node.image, "alpha_mode", text="")
 
-def draw_edit_layers_ui(self, context):
-    '''Draws the layer section user interface to the add-on side panel.'''
-    layout = self.layout
+def draw_material_selector(layout):
+    '''Draws material selector user interface to the specified layout.'''
+    # Don't draw the material selector if there is not active object.
+    active_object = bpy.context.view_layer.objects.active
+    if active_object == None:
+        return
+    
+    # Don't draw the material selector for anything
+    if active_object.type not in SUPPORTED_OBJECT_TYPES:
+        return
+
+    # Use a two column layout.
+    split = layout.split(factor=0.925)
+    first_column = split.column()
+    second_column = split.column()
+
+    # Draw the material slots list.
+    col = first_column.column()
+    col.template_list(
+        "MATERIAL_UL_matslots",
+        "",
+        active_object,
+        "material_slots",
+        active_object,
+        "active_material_index",
+        rows=4
+    )
+
+    # Draw operators to edit material slots.
+    col = second_column.column(align=True)
+    col.operator("rymat.add_material_slot", text="", icon='ADD')
+    col.operator("rymat.remove_material_slot", text="", icon='REMOVE')
+
+    col = second_column.column(align=True)
+    col.separator()
+
+    col = second_column.column(align=True)
+    col.operator("rymat.move_material_slot_up", text="", icon='TRIA_UP')
+    col.operator("rymat.move_material_slot_down", text="", icon='TRIA_DOWN')
+
+    # Draw the active material.
+    active_material = active_object.active_material
+    row = layout.row()
+    row.template_ID(
+        active_object, 
+        "active_material",
+        new="rymat.add_material_layer"
+    )
+
+def draw_material_properties(layout):
+    '''Draws material properties user interface to the specified layout.'''
 
     # Print info when there is no active object.
     active_object = bpy.context.view_layer.objects.active
-    if not active_object:
-        bau.print_aligned_text(layout, "No Active Object", alignment='CENTER')
+    if active_object == None:
+        bau.print_aligned_text(layout, "No Active Object", alignment='CENTER', label_icon='WARNING_LARGE')
         return
     
     # Print info for when the object is not a mesh.
-    if active_object.type != 'MESH':
-        bau.print_aligned_text(layout, "Active Object is Not a Mesh", alignment='CENTER')
+    if active_object.type not in SUPPORTED_OBJECT_TYPES:
+        bau.print_aligned_text(layout, "Active Object Type Not Supported", alignment='CENTER', label_icon='WARNING_LARGE')
         return
 
     # Print user info about hidden objects.
     if active_object.hide_get():
-        bau.print_aligned_text(layout, "Active Object Hidden", alignment='CENTER')
+        bau.print_aligned_text(layout, "Active Object Hidden", alignment='CENTER', label_icon='WARNING_LARGE')
         return
     
     # Draw user interface for when a shader node group is not defined.
     shader_info = bpy.context.scene.rymat_shader_info
     if shader_info.shader_node_group == None:
-        bau.print_aligned_text(layout, "No Shader Group Node", alignment='CENTER')
+        bau.print_aligned_text(layout, "No Shader Group Node", alignment='CENTER', label_icon='WARNING_LARGE')
         bau.print_aligned_text(layout, "Define a shader group node to edit layers.", alignment='CENTER')
 
         # Draw a button to open shader settings.
         row = layout.row()
         row.alignment = 'CENTER'
         column = row.column()
-        column.prop_enum(context.scene.rymat_panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="Open Shader Settings")
+        column.prop_enum(bpy.context.scene.rymat_panel_properties, "sections", 'SECTION_SHADER_SETTINGS', text="Open Shader Settings")
+
+        # Draw a link to documentation.
+        column.operator("wm.url_open", text="Open Documentation").url = "https://loganfairbairn.github.io/rymat_documentation.html"
         return
 
-    # Print info for when the active material isn't made with this add-on.
+    # Print info for when the active material is invalid.
     active_material = active_object.active_material
-    if bau.verify_addon_material(active_material) == False:
-        bau.print_aligned_text(layout, "Material Invalid", alignment='CENTER')
+    if bau.verify_addon_material(active_material) == False and active_material:
+        bau.print_aligned_text(layout, "Material Format Invalid", alignment='CENTER', label_icon='WARNING_LARGE')
         bau.print_aligned_text(layout, "Materials must be created with this add-on.", alignment='CENTER')
-        bau.print_aligned_text(layout, "Node format must remain unchanged.", alignment='CENTER')
+        bau.print_aligned_text(layout, "Material nodes must not be changed.", alignment='CENTER')
         return
+    
+    # Draw the selected material channel.
+    row = layout.row()
+    row.scale_y = 1.5
+    selected_material_channel = bpy.context.scene.rymat_layer_stack.selected_material_channel
+    row.menu("RYMAT_MT_material_channel_sub_menu", text=selected_material_channel)
 
-    # Print info for when the shader in the active material isn't defined in shader settings.
-    elif shaders.validate_active_shader(active_material) == False:
-        bau.print_aligned_text(layout, "Shader Not Defined", alignment='CENTER')
-        bau.print_aligned_text(layout, "Define the active shader in setup tab.")
-        return
+    # Draw layer operations.
+    row = layout.row(align=True)
+    row.scale_x = 10
+    row.scale_y = 1.5
+    row.operator("rymat.add_material_layer_menu", icon='ADD', text="")
+    row.operator("rymat.import_texture_set", icon='IMPORT', text="")
+    row.operator("rymat.move_material_layer_up", icon='TRIA_UP', text="")
+    row.operator("rymat.move_material_layer_down", icon='TRIA_DOWN', text="")
+    row.operator("rymat.duplicate_layer", icon='DUPLICATE', text="")
+    addon_preferences = bpy.context.preferences.addons[preferences.ADDON_NAME].preferences
+    if addon_preferences.experimental_features:
+        row.operator("rymat.merge_with_layer_below", icon='TRIA_DOWN_BAR', text="")
+    row.operator("rymat.isolate_material_channel", text="", icon='MATERIAL')
+    row.operator("rymat.show_compiled_material", text="", icon='SHADING_RENDERED')
+    row.operator("rymat.delete_layer", icon='TRASH', text="")
+
+    # Draw the layer stack.
+    row = layout.row(align=True)
+    row.template_list(
+        "RYMAT_UL_layer_list", 
+        "Layers", 
+        bpy.context.scene, 
+        "rymat_layers", 
+        bpy.context.scene.rymat_layer_stack, 
+        "selected_layer_index", 
+        sort_reverse=True
+    )
+
+    # Draw properties for the selected material layer.
+    layer_count = material_layers.count_layers()
+    if layer_count > 0:
+        row = layout.row(align=True)
+        row.scale_y = 1.5
+        row.prop_enum(bpy.context.scene, "rymat_material_property_tabs", 'MATERIAL_CHANNELS', text="CHANNELS")
+        row.prop_enum(bpy.context.scene, "rymat_material_property_tabs", 'PROJECTION', text="PROJECTION")
+        row.prop_enum(bpy.context.scene, "rymat_material_property_tabs", 'MASKS', text="MASKS")
+        row.prop_enum(bpy.context.scene, "rymat_material_property_tabs", 'UNLAYERED', text="UNLAYERED")
+        match bpy.context.scene.rymat_material_property_tabs:
+            case 'MATERIAL_CHANNELS':
+                draw_material_channel_properties(layout)
+            case 'MASKS':
+                draw_masks_tab(layout)
+            case 'PROJECTION':
+                draw_layer_projection(layout)
+            case 'UNLAYERED':
+                draw_unlayered_shader_properties(layout)
+    else:
+        bau.print_aligned_text(layout, "No Layer Selected", alignment='CENTER')
+
+def draw_color_palette(layout):
+    '''Draws a color palette to the specified layout.'''
+    tool_settings = bpy.context.tool_settings
+    row = layout.row(align=True)
+    if tool_settings.image_paint.palette:
+        row.template_ID(tool_settings.image_paint, "palette")
+        layout.template_palette(tool_settings.image_paint, "palette", color=True)
+    else:
+        row.template_ID(tool_settings.image_paint, "palette")
+        row.operator("palette.new", text="New Palette")
+
+def draw_edit_layers_ui(self):
+    '''Draws the layer section user interface to the add-on side panel.'''
+    layout = self.layout
+    draw_material_selector(layout)
+    draw_material_properties(layout)
 
 def draw_value_node_properties(layout, material_channel_name, layer_node_tree, selected_layer_index, value_node, mix_node):
     '''Draws properties for the provided material channel value node.'''
@@ -527,186 +649,6 @@ def draw_masks_tab(layout):
         draw_mask_properties(layout, mask_node, mask_type, selected_layer_index, selected_mask_index)
         draw_mask_projection(layout)
         draw_mask_mesh_maps(layout, selected_layer_index, selected_mask_index)
-
-def get_main_panel_context():
-    '''Returns true if the context is correct to draw the main panels.'''
-    if bpy.context.scene.rymat_panel_properties.sections != 'SECTION_EDIT_MATERIALS':
-        return False
-
-    active_object = bpy.context.view_layer.objects.active
-    if active_object == None:
-        return False
-
-    if active_object.type != 'MESH':
-        return False
-    
-    return True
-
-class MaterialSelectorPanel(Panel):
-    bl_label = "Material Selector"
-    bl_idname = "RYMAT_PT_material_selector_panel"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category = "RyMat"
-
-    # Only draw this panel when the edit materials section is selected.
-    @ classmethod
-    def poll(cls, context):
-        return get_main_panel_context()
-
-    def draw(self, context):        
-        layout = self.layout
-        active_object = bpy.context.active_object
-        
-        # Use a two column layout.
-        split = layout.split(factor=0.925)
-        first_column = split.column()
-        second_column = split.column()
-
-        # Draw the material slots list.
-        col = first_column.column()
-        col.template_list(
-            "MATERIAL_UL_matslots",
-            "",
-            active_object,
-            "material_slots",
-            active_object,
-            "active_material_index",
-            rows=4
-        )
-
-        # Draw operators to edit material slots.
-        col = second_column.column(align=True)
-        col.operator("rymat.add_material_slot", text="", icon='ADD')
-        col.operator("rymat.remove_material_slot", text="", icon='REMOVE')
-
-        col = second_column.column(align=True)
-        col.separator()
-
-        col = second_column.column(align=True)
-        col.operator("rymat.move_material_slot_up", text="", icon='TRIA_UP')
-        col.operator("rymat.move_material_slot_down", text="", icon='TRIA_DOWN')
-
-        # Draw the active material.
-        split = layout.split(factor=STANDARD_UI_SPLIT)
-        first_column = split.column()
-        second_column = split.column()
-        row = first_column.row()
-        row.label(text="Active Material")
-        row = second_column.row()
-        row.template_ID(
-            bpy.context.active_object, 
-            "active_material", 
-            new="rymat.add_material_layer"
-        )
-
-        # Draw the shader node detected the active material.
-        active_material = bpy.context.active_object.active_material
-        row = first_column.row()
-        row.label(text="Active Shader Node")
-        row = second_column.row()
-        if active_material:
-            shader_node = active_material.node_tree.nodes.get('SHADER_NODE')
-            if shader_node:
-                row.enabled = False
-                row.prop(shader_node.node_tree, "name", text="")
-            else:
-                row.label(text="NONE")
-        else:
-            row.label(text="NONE")
-
-class ColorPalettePanel(Panel):
-    bl_label = "Color Palette"
-    bl_idname = "RYMAT_PT_color_palette"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category = "RyMat"
-
-    # Only draw this panel when the edit materials section is selected.
-    @ classmethod
-    def poll(cls, context):
-        return get_main_panel_context() and bpy.context.scene.rymat_shader_info.shader_node_group
-
-    def draw(self, context):
-        layout = self.layout
-        tool_settings = context.tool_settings
-        row = layout.row(align=True)
-        if tool_settings.image_paint.palette:
-            row.template_ID(tool_settings.image_paint, "palette")
-            layout.template_palette(tool_settings.image_paint, "palette", color=True)
-        else:
-            row.template_ID(tool_settings.image_paint, "palette")
-            row.operator("palette.new", text="New Palette")
-
-class MaterialPropertiesPanel(Panel):
-    bl_label = "Material Properties"
-    bl_idname = "RYMAT_PT_material_properties_panel"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category = "RyMat"
-
-    # Only draw this panel when the edit materials section is selected.
-    @ classmethod
-    def poll(cls, context):
-        return get_main_panel_context() and bpy.context.scene.rymat_shader_info.shader_node_group
-
-    def draw(self, context):
-        layout = self.layout
-
-        # Draw the selected material channel.
-        row = layout.row()
-        row.scale_y = 1.5
-        selected_material_channel = bpy.context.scene.rymat_layer_stack.selected_material_channel
-        row.menu("RYMAT_MT_material_channel_sub_menu", text=selected_material_channel)
-
-        # Draw layer operations.
-        row = layout.row(align=True)
-        row.scale_x = 10
-        row.scale_y = 1.5
-        row.operator("rymat.add_material_layer_menu", icon='ADD', text="")
-        row.operator("rymat.import_texture_set", icon='IMPORT', text="")
-        row.operator("rymat.move_material_layer_up", icon='TRIA_UP', text="")
-        row.operator("rymat.move_material_layer_down", icon='TRIA_DOWN', text="")
-        row.operator("rymat.duplicate_layer", icon='DUPLICATE', text="")
-        addon_preferences = bpy.context.preferences.addons[preferences.ADDON_NAME].preferences
-        if addon_preferences.experimental_features:
-            row.operator("rymat.merge_with_layer_below", icon='TRIA_DOWN_BAR', text="")
-        row.operator("rymat.isolate_material_channel", text="", icon='MATERIAL')
-        row.operator("rymat.show_compiled_material", text="", icon='SHADING_RENDERED')
-        row.operator("rymat.delete_layer", icon='TRASH', text="")
-
-        # Draw the layer stack.
-        row = layout.row(align=True)
-        row.template_list(
-            "RYMAT_UL_layer_list", 
-            "Layers", 
-            bpy.context.scene, 
-            "rymat_layers", 
-            bpy.context.scene.rymat_layer_stack, 
-            "selected_layer_index", 
-            sort_reverse=True
-        )
-
-        # Draw properties for the selected material layer.
-        layer_count = material_layers.count_layers()
-        if layer_count > 0:
-            row = layout.row(align=True)
-            row.scale_y = 1.5
-            row.prop_enum(bpy.context.scene, "rymat_material_property_tabs", 'MATERIAL_CHANNELS', text="CHANNELS")
-            row.prop_enum(bpy.context.scene, "rymat_material_property_tabs", 'PROJECTION', text="PROJECTION")
-            row.prop_enum(bpy.context.scene, "rymat_material_property_tabs", 'MASKS', text="MASKS")
-            row.prop_enum(bpy.context.scene, "rymat_material_property_tabs", 'UNLAYERED', text="UNLAYERED")
-            match bpy.context.scene.rymat_material_property_tabs:
-                case 'MATERIAL_CHANNELS':
-                    draw_material_channel_properties(layout)
-                case 'MASKS':
-                    draw_masks_tab(layout)
-                case 'PROJECTION':
-                    draw_layer_projection(layout)
-                case 'UNLAYERED':
-                    draw_unlayered_shader_properties(layout)
-        else:
-            bau.print_aligned_text(layout, "No Layer Selected", alignment='CENTER')
 
 class RYMAT_OT_add_material_layer_menu(Operator):
     bl_label = ""

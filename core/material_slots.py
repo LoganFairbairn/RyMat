@@ -13,7 +13,7 @@ class RYMAT_OT_add_material_slot(Operator):
 
     @ classmethod
     def poll(cls, context):
-        return context.active_object
+        return context.view_layer.objects.active
 
     def execute(self, context):
         bpy.ops.object.material_slot_add()
@@ -28,7 +28,7 @@ class RYMAT_OT_remove_material_slot(Operator):
 
     @ classmethod
     def poll(cls, context):
-        return context.active_object
+        return context.view_layer.objects.active
 
     def execute(self, context):
         bpy.ops.object.material_slot_remove()
@@ -43,7 +43,7 @@ class RYMAT_OT_move_material_slot_up(Operator):
 
     @ classmethod
     def poll(cls, context):
-        return context.active_object
+        return context.view_layer.objects.active
 
     def execute(self, context):
         bpy.ops.object.material_slot_move(direction='UP')
@@ -58,7 +58,7 @@ class RYMAT_OT_move_material_slot_down(Operator):
 
     @ classmethod
     def poll(cls, context):
-        return context.active_object
+        return context.view_layer.objects.active
 
     def execute(self, context):
         bpy.ops.object.material_slot_move(direction='DOWN')
