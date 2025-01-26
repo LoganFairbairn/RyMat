@@ -842,6 +842,19 @@ def get_shader_channel_enum_items(scene=None, context=None):
     
     return items
 
+def verify_exporting_texture_context(context):
+    '''Runs checks to verify if exporting textures is possible. If exporting textures is invalid, an info message will be returned.'''
+    if not context.active_object:
+        return False
+    
+    if context.active_object.active_material == None:
+        return False
+    
+    if bau.verify_addon_material(context.active_object.active_material) == False:
+        return False
+
+    return True
+
 
 #----------------------------- EXPORT OPERATORS -----------------------------#
 
@@ -897,7 +910,7 @@ class RYMAT_OT_export(Operator):
     # Users must have an object selected to call this operator.
     @ classmethod
     def poll(cls, context):
-        return bau.verify_addon_active_material(context)
+        return verify_exporting_texture_context(context)
     
     def modal(self, context, event):
         if event.type in {'ESC'}:

@@ -1,41 +1,31 @@
 # This files handles drawing the exporting section's user interface.
 
 import bpy
-from bpy.types import Menu
 from ..core import material_layers
 from ..core import blender_addon_utils as bau
 from . import bpy_ui_wrappers as bui
 from . import ui_render_devices
 
-def verify_exporting_textures_is_valid(context):
-    '''Runs checks to verify if exporting textures is possible. If exporting textures is invalid, an info message will be returned.'''
-    if not context.active_object:
-        return "No Active Object"
-    
-    if context.active_object.active_material == None:
-        return "No Active Material"
-    
-    if bau.verify_addon_material(context.active_object.active_material) == False:
-        return "Material Invalid"
-
-    return ""
-
 def draw_export_textures_ui(self, context):
     '''Draws user interface for the export section.'''
     layout = self.layout
-
-    # Display a message when there is no active object.
-    exporting_textures_error = verify_exporting_textures_is_valid(context)
-    if exporting_textures_error != "":
-        bau.print_aligned_text(layout, "Can't Export Textures", alignment='CENTER')
-        bau.print_aligned_text(layout, exporting_textures_error, alignment='CENTER')
-        return
 
     # Draw export button.
     row = layout.row(align=True)
     row.scale_y = 2.0
     row.operator("rymat.export", text="Export Textures")
 
+    # Display an info message if users can't export textures.
+    active_object = bpy.context.view_layer.objects.active
+    if not active_object:
+        bau.print_aligned_text(layout, "No Active Object", alignment='CENTER', label_icon='ERROR')
+    
+    elif active_object.active_material == None:
+        bau.print_aligned_text(layout, "No Active Material", alignment='CENTER', label_icon='ERROR')
+    
+    elif bau.verify_addon_material(active_object.active_material) == False:
+        bau.print_aligned_text(layout, "Invalid Material", alignment='CENTER', label_icon='ERROR')
+    
     # Draw render device settings.
     ui_render_devices.draw_render_device_settings(layout)
 
