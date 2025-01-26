@@ -8,6 +8,7 @@ from ..core import mesh_map_baking
 from ..core import blender_addon_utils
 from ..core import blender_addon_utils as bau
 from ..core import material_filters
+from . import bpy_ui_wrappers as bui
 from .. import preferences
 
 STANDARD_UI_SPLIT = 0.4
@@ -134,7 +135,7 @@ def draw_material_selector(layout):
     col.operator("rymat.remove_material_slot", text="", icon='REMOVE')
 
     col = second_column.column(align=True)
-    col.separator()
+    bui.separator(layout, type='SPACE')
 
     col = second_column.column(align=True)
     col.operator("rymat.move_material_slot_up", text="", icon='TRIA_UP')
@@ -155,23 +156,23 @@ def draw_material_properties(layout):
     # Print info when there is no active object.
     active_object = bpy.context.view_layer.objects.active
     if active_object == None:
-        bau.print_aligned_text(layout, "No Active Object", alignment='CENTER', label_icon='WARNING_LARGE')
+        bau.print_aligned_text(layout, "No Active Object", alignment='CENTER', label_icon='ERROR')
         return
     
     # Print info for when the object is not a mesh.
     if active_object.type not in SUPPORTED_OBJECT_TYPES:
-        bau.print_aligned_text(layout, "Active Object Type Not Supported", alignment='CENTER', label_icon='WARNING_LARGE')
+        bau.print_aligned_text(layout, "Active Object Type Not Supported", alignment='CENTER', label_icon='ERROR')
         return
 
     # Print user info about hidden objects.
     if active_object.hide_get():
-        bau.print_aligned_text(layout, "Active Object Hidden", alignment='CENTER', label_icon='WARNING_LARGE')
+        bau.print_aligned_text(layout, "Active Object Hidden", alignment='CENTER', label_icon='ERROR')
         return
     
     # Draw user interface for when a shader node group is not defined.
     shader_info = bpy.context.scene.rymat_shader_info
     if shader_info.shader_node_group == None:
-        bau.print_aligned_text(layout, "No Shader Group Node", alignment='CENTER', label_icon='WARNING_LARGE')
+        bau.print_aligned_text(layout, "No Shader Group Node", alignment='CENTER', label_icon='ERROR')
         bau.print_aligned_text(layout, "Define a shader group node to edit layers.", alignment='CENTER')
 
         # Draw a button to open shader settings.
@@ -187,7 +188,7 @@ def draw_material_properties(layout):
     # Print info for when the active material is invalid.
     active_material = active_object.active_material
     if bau.verify_addon_material(active_material) == False and active_material:
-        bau.print_aligned_text(layout, "Material Format Invalid", alignment='CENTER', label_icon='WARNING_LARGE')
+        bau.print_aligned_text(layout, "Material Format Invalid", alignment='CENTER', label_icon='ERROR')
         bau.print_aligned_text(layout, "Materials must be created with this add-on.", alignment='CENTER')
         bau.print_aligned_text(layout, "Material nodes must not be changed.", alignment='CENTER')
         return
@@ -442,7 +443,7 @@ def draw_material_channel_properties(layout):
         value_node = material_layers.get_material_layer_node('VALUE', selected_layer_index, channel.name)
         if value_node and mix_node:
             if not mix_node.mute:
-                layout.separator(type='LINE')
+                bui.separator(layout, type='LINE')
                 draw_value_node_properties(layout, channel.name, layer_node_tree, selected_layer_index, value_node, mix_node)
                 draw_filter_properties(layout, channel.name, selected_layer_index)
 
@@ -556,7 +557,7 @@ def draw_mask_projection(layout):
     '''Draws projection settings for the selected mask.'''
     row = layout.row()
     row.scale_y = 2.5
-    row.separator()
+    bui.separator(layout, type='SPACE')
 
     # If no mask projection node exists, abort drawing properties for it.
     selected_layer_index = bpy.context.scene.rymat_layer_stack.selected_layer_index
@@ -592,7 +593,7 @@ def draw_mask_mesh_maps(layout, selected_layer_index, selected_mask_index):
         if mesh_map_texture_node:
             if not drew_title:
                 row = layout.row()
-                row.separator()
+                bui.separator(layout, type='SPACE')
                 row = layout.row()
                 row.label(text="MESH MAPS")
                 drew_title = True

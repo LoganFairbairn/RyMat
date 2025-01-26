@@ -82,7 +82,7 @@ def draw_shader_setting_ui(layout):
         active_material = bpy.context.view_layer.objects.active.active_material
         if active_material:
             draw_material_selector(layout)
-            bau.print_aligned_text(layout, "Active Material Selected", alignment='CENTER', label_icon='WARNING_LARGE')
+            bau.print_aligned_text(layout, "Active Material Selected", alignment='CENTER', label_icon='ERROR')
             bau.print_aligned_text(layout, "Shader Settings Not Available", alignment='CENTER')
             return
 

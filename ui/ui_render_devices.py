@@ -1,11 +1,12 @@
 import bpy
 from ..core import blender_addon_utils as bau
+from . import bpy_ui_wrappers as bui
 
 def draw_render_device_settings(layout):
     '''Draws render device settings crucial for improving baking speeds.'''
 
     row = layout.row()
-    row.separator()
+    bui.separator(row, type='NONE')
 
     row = layout.row()
     row.label(text="RENDER DEVICES")
@@ -50,4 +51,4 @@ def draw_render_device_settings(layout):
         )
     
     # Draw a separator to visually distiguish this section from other settings.
-    layout.separator(type='LINE')
+    bui.separator(layout, type='LINE')

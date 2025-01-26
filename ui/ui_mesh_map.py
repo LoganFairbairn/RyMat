@@ -3,6 +3,7 @@
 import bpy
 from ..core import mesh_map_baking
 from ..core import blender_addon_utils as bau
+from . import bpy_ui_wrappers as bui
 from . import ui_render_devices
 
 def draw_mesh_map_status(layout, baking_settings):
@@ -48,7 +49,7 @@ def draw_mesh_map_status(layout, baking_settings):
 def draw_mesh_map_previews(layout):
     '''Draws operators to enable & disable mesh map baking previews.'''
     row = layout.row()
-    row.separator()
+    bui.separator(row, type='NONE')
     row.scale_y = 2
 
     # Draw section title.
@@ -82,7 +83,7 @@ def draw_mesh_map_settings(layout, baking_settings):
     '''Draws settings for mesh map baking.'''
 
     row = layout.row()
-    row.separator()
+    bui.separator(row, type='NONE')
     layout.label(text="BAKING OBJECTS")
 
     row = layout.row()
@@ -111,7 +112,7 @@ def draw_mesh_map_settings(layout, baking_settings):
     row = second_column.row()
     row.prop(baking_settings, "high_poly_object", text="", slider=True)
 
-    layout.separator()
+    bui.separator(layout, type='NONE')
     row = layout.row()
     layout.label(text="SETTINGS")
 
@@ -147,7 +148,7 @@ def draw_mesh_map_settings(layout, baking_settings):
     row.prop(baking_settings, "uv_padding", text="")
 
     # Ambient Occlusion Settings
-    layout.separator()
+    bui.separator(layout, type='NONE')
     layout.label(text="AMBIENT OCCLUSION")
     split = layout.split(factor=0.4)
     first_column = split.column()
@@ -174,7 +175,7 @@ def draw_mesh_map_settings(layout, baking_settings):
     row.prop(baking_settings, "local_occlusion", text="")
 
     # Curvature Settings
-    layout.separator()
+    bui.separator(layout, type='NONE')
     layout.label(text="CURVATURE")
     split = layout.split(factor=0.4)
     first_column = split.column()
@@ -196,7 +197,7 @@ def draw_mesh_map_settings(layout, baking_settings):
     row.prop(baking_settings, "relative_to_bounding_box", text="")
 
     # Thickness Settings
-    layout.separator()
+    bui.separator(layout, type='NONE')
     layout.label(text="THICKNESS")
     split = layout.split(factor=0.4)
     first_column = split.column()

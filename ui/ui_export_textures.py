@@ -4,6 +4,7 @@ import bpy
 from bpy.types import Menu
 from ..core import material_layers
 from ..core import blender_addon_utils as bau
+from . import bpy_ui_wrappers as bui
 from . import ui_render_devices
 
 def verify_exporting_textures_is_valid(context):
@@ -117,7 +118,7 @@ def draw_export_textures_ui(self, context):
     # Draw channel packing textures.
     for i, texture in enumerate(texture_export_settings.export_textures):
         row = layout.row()
-        layout.separator(type='LINE')
+        bui.separator(layout, type='LINE')
         split = layout.split(factor=0.4)
         first_column = split.column()
         second_column = split.column()
