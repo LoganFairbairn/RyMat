@@ -192,12 +192,11 @@ class RYMAT_OT_import_texture_node_image(Operator, ImportHelper):
         head_tail = os.path.split(self.filepath)
         image_name = head_tail[1]
 
-        # TODO: This might cause an error!
-        # Delete images with the same name if they exist.
+        # To avoid users importing the same image twice, if the image already exists, throw an error.
         image = bpy.data.images.get(image_name)
         if image:
-            debug_logging.log("Removed " + image.name)
-            bpy.data.images.remove(image)
+            debug_logging.log_status("Failed to import image. An image with the same name already exists in blend data.", self, type='ERROR')
+            return {'CANCELLED'}
             
         bpy.ops.image.open(filepath=self.filepath)
         image = bpy.data.images[image_name]
