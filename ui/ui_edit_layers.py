@@ -1,7 +1,7 @@
 # This file handles drawing the user interface for the layers section.
 
 import bpy
-from bpy.types import Operator, Menu, Panel
+from bpy.types import Operator, Menu
 from ..core import material_layers
 from ..core import layer_masks
 from ..core import mesh_map_baking
