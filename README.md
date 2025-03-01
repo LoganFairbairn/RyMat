@@ -1,10 +1,17 @@
 # RyMat
 
-### Note: This add-on is currently in testing.
+<p style="text-align:center; font-weight:bold;">CURRENTLY IN TESTING</p>
 
-RyMat is my personal add-on for Blender made to speed up and simplify the material editing workflow within Blender. I've invested well over 2500 hours over the past 4 years designing, programming, researching and testing to make this software a powerful addition to Blender. RyMat can be used to make optimized, professional quality textures for models used in Unity, Unreal Engine, VRChat, and much more. This add-on is free and open-source software, so everyone has the freedom to create.
+RyMat is my personal texture painting / material editing add-on for Blender that adds a layer based user interface, baking, exporting and file management tools. This add-on is open-source and 100% free, so everyone has the freedom to create.
 
 Cheers!
+
+![Release Stability](https://img.shields.io/badge/Latest_Release_Stability-Unstable-red)
+![Blender](https://img.shields.io/badge/Blender-4.0%2B-orange?logo=blender)
+![Python](https://img.shields.io/badge/Python-grey?logo=python)
+![Linux](https://img.shields.io/badge/-Linux-grey?logo=linux)
+![macOS](https://img.shields.io/badge/-OSX-grey?logo=apple)
+
 
 ## Main Features
 
@@ -18,9 +25,9 @@ Cheers!
 
 ## FAQ
 
-Q: Why would I use RyMat over other material editing software?
+Why would I use RyMat over other material editing software?
 - RyMat is 100% free, no monthly subscription, no one-time payment required.
-- You can keep your workflow within Blender.
+- You keep your workflow within Blender.
 - You support free and open-source software.
 - Your privacy is important to you, this add-on has no telemetry.
-- If you have the skills, you can mod this add-on to suit your needs.
+- You can mod this add-on to suit your needs.
